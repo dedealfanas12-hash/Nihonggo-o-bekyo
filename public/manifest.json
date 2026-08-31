@@ -3,7 +3,7 @@
   "short_name": "Nihonggoku",
   "description": "Web belajar bahasa Jepang",
   "start_url": "./",
-  "scope": "/",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",

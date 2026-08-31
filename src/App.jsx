@@ -13,6 +13,25 @@ import {
   deleteAccountProgress,
 } from "./firebaseSync.js";
 
+// Confetti rayakan-lulus-tes, dimuat lazy (dynamic import) supaya tidak menambah beban awal —
+// baru betulan diambil saat momen merayakannya terjadi (lihat pemicunya di QuizView).
+let confettiModulePromise = null;
+function launchConfetti() {
+  if (!confettiModulePromise) {
+    confettiModulePromise = import("canvas-confetti").then((m) => m.default);
+  }
+  confettiModulePromise
+    .then((confetti) => {
+      confetti({
+        particleCount: 120,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ["#b91c1c", "#f59e0b", "#10b981", "#f43f5e"],
+      });
+    })
+    .catch(() => {}); // gagal diam-diam — confetti murni kosmetik, tidak boleh bikin error
+}
+
 /* =========================================================================
    DATA — Hiragana / Katakana / Vocabulary
    ========================================================================= */
@@ -1400,6 +1419,13 @@ function QuizView({ data, category, levelId, mode, questionType, customBank, onE
   const [correctKeysList, setCorrectKeysList] = useState([]);
   const [phase, setPhase] = useState("active");
   const [resultInfo, setResultInfo] = useState(null);
+
+  // Rayakan dengan confetti sekali saja, tepat saat layar hasil tes yang LULUS muncul.
+  useEffect(() => {
+    if (mode === "test" && phase === "result" && resultInfo && resultInfo.passed) {
+      launchConfetti();
+    }
+  }, [phase, resultInfo, mode]);
 
   const questions = session.selected;
   const current = questions[index];

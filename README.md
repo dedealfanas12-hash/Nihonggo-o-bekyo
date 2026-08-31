@@ -13,6 +13,8 @@ Dibangun dengan React + Vite + Tailwind CSS.
 - Maksimal 3x percobaan per huruf; setelah itu **panduan langkah menulis** muncul otomatis — kotak gambar huruf dengan jejak titik-titik samar (dibuat dari bentuk asli hurufnya, bukan gambar tangan) plus lingkaran bernomor di titik mulai tiap goresan, ditambah rincian teks per langkah. Panduan yang sama juga bisa dilihat lebih awal lewat tautan "Lihat cara menulis"
 - Progres, XP, dan streak tersimpan otomatis (lihat "Progres bersama" di bawah)
 - Pengucapan kata dalam bahasa Jepang lewat Web Speech API
+- Animasi confetti otomatis saat lulus tes (skor ≥ 80%)
+- Bisa "diinstall" sebagai aplikasi di HP/laptop (PWA) — lewat menu "Add to Home Screen" / "Install app" di browser
 - Tampilan responsif (sidebar di desktop, bottom nav di mobile)
 
 ## Progres bersama & real-time (opsional, gratis)
@@ -63,6 +65,8 @@ Nilai-nilai config ini **aman di-commit ke GitHub** — bukan rahasia; keamanan 
 Saat pertama kali membuat sebuah akun (nama yang belum pernah dipakai), progres lokal perangkat itu (kalau ada) jadi titik awal akun tersebut, lalu diunggah supaya siapa pun yang masuk dengan nama yang sama ikut melihatnya.
 
 Ada indikator kecil di pojok Dashboard yang menunjukkan status & nama akun yang aktif ("Real-time · &lt;nama&gt;" / "Mode lokal"), plus tautan **Ganti akun** untuk kembali ke layar masuk.
+
+Di layar masuk, tiap nama akun yang sudah ada punya tanda **×** kecil di sebelahnya — klik untuk menghapus akun itu beserta seluruh progresnya secara permanen (akan diminta konfirmasi dulu). Kalau nanti ada yang masuk lagi dengan nama yang sama persis setelah dihapus, progresnya mulai dari nol, bukan progres lama yang muncul lagi.
 
 ## Menjalankan secara lokal
 
@@ -135,8 +139,3 @@ nihongo-step/
 ## Catatan penyimpanan progres
 
 Tanpa setup Firebase: progres disimpan lewat `window.storage` jika tersedia (mis. saat berjalan sebagai Claude artifact), dan otomatis jatuh ke `localStorage` browser saat di-deploy sebagai situs biasa — tidak ada setup tambahan, tapi progresnya khusus perangkat itu saja. Dengan Firebase disetel (lihat bagian "Progres bersama & real-time" di atas), `localStorage` tetap dipakai sebagai cadangan lokal, tapi Firebase Realtime Database yang jadi sumber utama & disinkron ke semua perangkat.
-
-
-## Tambahan: Pola Kalimat
-
-Aplikasi juga memiliki kategori **Pola Kalimat** dengan 10 bab dasar N5. Setiap bab berisi pola, penjelasan, contoh kalimat, audio, serta latihan pilihan ganda berdasarkan contoh kalimat.
