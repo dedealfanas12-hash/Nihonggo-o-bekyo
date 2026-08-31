@@ -4,13 +4,13 @@ import {
   Flame, ChevronRight, ChevronLeft, X, RotateCcw, Star, Sparkles, ArrowRight, Trophy, Eraser,
 } from "lucide-react";
 import { getStrokeGuide } from "./strokeGuides.js";
-import WritingQuiz from "./components/WritingQuiz.js";
 import {
   isFirebaseEnabled,
   slugifyAccountName,
   subscribeAccountList,
   subscribeUserProgress,
   pushUserProgress,
+  deleteAccountProgress,
 } from "./firebaseSync.js";
 
 /* =========================================================================
@@ -156,82 +156,6 @@ const VOCAB_LEVELS = [
   ]},
 ];
 
-const POLA_KALIMAT_LEVELS = [
-  { id: 1, title: "です — Kalimat Dasar 'Adalah'", jlpt: "N5", pattern: "[Kata benda 1] は [Kata benda 2] です",
-    explanation: "Pola paling dasar untuk menyatakan bahwa sesuatu ADALAH sesuatu yang lain. Partikel は menandai topik kalimat dan dibaca 'wa', bukan 'ha'.",
-    examples: [
-      { jp: "私は学生です。", romaji: "Watashi wa gakusei desu.", meaning: "Saya adalah siswa." },
-      { jp: "これは本です。", romaji: "Kore wa hon desu.", meaning: "Ini adalah buku." },
-      { jp: "田中さんは先生です。", romaji: "Tanaka-san wa sensei desu.", meaning: "Tanaka adalah guru." },
-      { jp: "今日は月曜日です。", romaji: "Kyou wa getsuyoubi desu.", meaning: "Hari ini adalah hari Senin." },
-    ]},
-  { id: 2, title: "Kalimat Negatif です", jlpt: "N5", pattern: "[KB1] は [KB2] じゃありません",
-    explanation: "Bentuk negatif dari です, dipakai untuk menyatakan sesuatu BUKAN sesuatu. じゃありません lebih santai, ではありません lebih formal — artinya sama.",
-    examples: [
-      { jp: "私は先生じゃありません。", romaji: "Watashi wa sensei ja arimasen.", meaning: "Saya bukan guru." },
-      { jp: "これは私の本じゃありません。", romaji: "Kore wa watashi no hon ja arimasen.", meaning: "Ini bukan buku saya." },
-      { jp: "田中さんは学生ではありません。", romaji: "Tanaka-san wa gakusei dewa arimasen.", meaning: "Tanaka bukan siswa." },
-    ]},
-  { id: 3, title: "Kata Tanya か", jlpt: "N5", pattern: "[Kalimat] + か。",
-    explanation: "Menambahkan か di akhir kalimat mengubahnya jadi pertanyaan. Untuk pertanyaan 5W, pakai kata tanya seperti 何 (apa), 誰 (siapa), どこ (di mana), いつ (kapan) di posisi yang ditanyakan.",
-    examples: [
-      { jp: "これは本ですか。", romaji: "Kore wa hon desu ka.", meaning: "Apakah ini buku?" },
-      { jp: "これは何ですか。", romaji: "Kore wa nan desu ka.", meaning: "Ini apa?" },
-      { jp: "あの人は誰ですか。", romaji: "Ano hito wa dare desu ka.", meaning: "Orang itu siapa?" },
-      { jp: "トイレはどこですか。", romaji: "Toire wa doko desu ka.", meaning: "Toilet di mana?" },
-    ]},
-  { id: 4, title: "Kata Tunjuk これ・それ・あれ", jlpt: "N5", pattern: "これ/それ/あれ、この/その/あの + [KB]",
-    explanation: "これ/それ/あれ berdiri sendiri sebagai kata benda (ini/itu-dekat lawan bicara/itu-jauh). この/その/あの harus diikuti kata benda (buku ini, buku itu, dst).",
-    examples: [
-      { jp: "これは私の傘です。", romaji: "Kore wa watashi no kasa desu.", meaning: "Ini payung saya." },
-      { jp: "その本は面白いです。", romaji: "Sono hon wa omoshiroi desu.", meaning: "Buku itu menarik." },
-      { jp: "あの建物は駅です。", romaji: "Ano tatemono wa eki desu.", meaning: "Bangunan itu adalah stasiun." },
-    ]},
-  { id: 5, title: "Partikel の — Kepemilikan", jlpt: "N5", pattern: "[Pemilik] の [Benda]",
-    explanation: "の menghubungkan dua kata benda, biasanya untuk menunjukkan kepemilikan atau keterkaitan — mirip 'nya'/'punya' atau 'of' dalam bahasa Inggris.",
-    examples: [
-      { jp: "私の本です。", romaji: "Watashi no hon desu.", meaning: "Buku saya." },
-      { jp: "田中さんの車です。", romaji: "Tanaka-san no kuruma desu.", meaning: "Mobil Tanaka." },
-      { jp: "日本の文化です。", romaji: "Nihon no bunka desu.", meaning: "Budaya Jepang." },
-    ]},
-  { id: 6, title: "あります・います — Menyatakan Keberadaan", jlpt: "N5", pattern: "[Tempat] に [Benda] があります / [Makhluk hidup] がいます",
-    explanation: "あります dipakai untuk benda mati/tak bergerak, います untuk manusia dan hewan. に menandai lokasi keberadaannya.",
-    examples: [
-      { jp: "机の上に本があります。", romaji: "Tsukue no ue ni hon ga arimasu.", meaning: "Di atas meja ada buku." },
-      { jp: "部屋に猫がいます。", romaji: "Heya ni neko ga imasu.", meaning: "Di kamar ada kucing." },
-      { jp: "公園に子供がいます。", romaji: "Kouen ni kodomo ga imasu.", meaning: "Di taman ada anak-anak." },
-    ]},
-  { id: 7, title: "Kata Kerja Bentuk ~ます", jlpt: "N5", pattern: "[Subjek] は [Objek] を [Kata kerja]ます",
-    explanation: "Bentuk ~ます adalah bentuk sopan kata kerja untuk masa sekarang/akan datang. を menandai objek langsung dari kata kerja.",
-    examples: [
-      { jp: "毎日、日本語を勉強します。", romaji: "Mainichi, nihongo wo benkyou shimasu.", meaning: "Setiap hari belajar bahasa Jepang." },
-      { jp: "朝ご飯を食べます。", romaji: "Asagohan wo tabemasu.", meaning: "Makan sarapan." },
-      { jp: "明日、学校へ行きます。", romaji: "Ashita, gakkou e ikimasu.", meaning: "Besok pergi ke sekolah." },
-    ]},
-  { id: 8, title: "Bentuk ~ません", jlpt: "N5", pattern: "[Kata kerja]ません",
-    explanation: "Bentuk negatif dari ~ます, dipakai untuk menyatakan tidak melakukan sesuatu di masa sekarang/akan datang.",
-    examples: [
-      { jp: "肉を食べません。", romaji: "Niku wo tabemasen.", meaning: "Tidak makan daging." },
-      { jp: "今日は勉強しません。", romaji: "Kyou wa benkyou shimasen.", meaning: "Hari ini tidak belajar." },
-      { jp: "コーヒーを飲みません。", romaji: "Koohii wo nomimasen.", meaning: "Tidak minum kopi." },
-    ]},
-  { id: 9, title: "Bentuk Lampau ~ました", jlpt: "N5", pattern: "[Kata kerja]ました / ~ませんでした",
-    explanation: "ました menyatakan sesuatu SUDAH terjadi (lampau positif); ませんでした menyatakan sesuatu TIDAK terjadi di masa lampau.",
-    examples: [
-      { jp: "昨日、映画を見ました。", romaji: "Kinou, eiga wo mimashita.", meaning: "Kemarin menonton film." },
-      { jp: "先週、勉強しませんでした。", romaji: "Senshuu, benkyou shimasen deshita.", meaning: "Minggu lalu tidak belajar." },
-      { jp: "朝ご飯を食べました。", romaji: "Asagohan wo tabemashita.", meaning: "Sudah makan sarapan." },
-    ]},
-  { id: 10, title: "Kata Sifat い (i-adjective)", jlpt: "N5", pattern: "[KB] は [Kata sifat-i] です",
-    explanation: "Kata sifat yang berakhiran い (kecuali きれい/嫌い yang sebenarnya na-adjective) bisa langsung menempel di depan です tanpa kata penghubung tambahan.",
-    examples: [
-      { jp: "この本は面白いです。", romaji: "Kono hon wa omoshiroi desu.", meaning: "Buku ini menarik." },
-      { jp: "今日は暑いです。", romaji: "Kyou wa atsui desu.", meaning: "Hari ini panas." },
-      { jp: "日本語は難しいです。", romaji: "Nihongo wa muzukashii desu.", meaning: "Bahasa Jepang sulit." },
-    ]},
-];
-
-
 const BADGES = [
   { id: "hiragana_beginner", title: "Hiragana Beginner", desc: "Menyelesaikan Level 1 Hiragana", icon: "🏅" },
   { id: "hiragana_master", title: "Hiragana Master", desc: "Menyelesaikan semua level Hiragana", icon: "🏆" },
@@ -239,18 +163,15 @@ const BADGES = [
   { id: "katakana_master", title: "Katakana Master", desc: "Menyelesaikan semua level Katakana", icon: "🏆" },
   { id: "vocab_beginner", title: "Vocabulary Beginner", desc: "Menyelesaikan Level 1 Kosakata", icon: "🏅" },
   { id: "vocab_master", title: "Vocabulary Master", desc: "Menyelesaikan semua level Kosakata", icon: "🏆" },
-  { id: "pattern_beginner", title: "Pola Kalimat Beginner", desc: "Menyelesaikan Bab 1 Pola Kalimat", icon: "🏅" },
-  { id: "pattern_master", title: "Pola Kalimat Master", desc: "Menyelesaikan semua bab Pola Kalimat yang tersedia", icon: "🏆" },
   { id: "streak_7", title: "7 Hari Beruntun", desc: "Belajar 7 hari berturut-turut", icon: "🔥" },
 ];
 
 const CATEGORY_META = {
-  hiragana: { label: "Hiragana", levels: HIRAGANA_LEVELS, sample: "あ・い・う", isVocab: false, contentType: "kana", badgePrefix: "hiragana" },
-  katakana: { label: "Katakana", levels: KATAKANA_LEVELS, sample: "ア・イ・ウ", isVocab: false, contentType: "kana", badgePrefix: "katakana" },
-  vocabulary: { label: "Kosakata", levels: VOCAB_LEVELS, sample: "言葉", isVocab: true, contentType: "vocab", badgePrefix: "vocab" },
-  "pola-kalimat": { label: "Pola Kalimat", levels: POLA_KALIMAT_LEVELS, sample: "文型", isVocab: false, contentType: "pattern", badgePrefix: "pattern" },
+  hiragana: { label: "Hiragana", levels: HIRAGANA_LEVELS, sample: "あ・い・う", isVocab: false, badgePrefix: "hiragana" },
+  katakana: { label: "Katakana", levels: KATAKANA_LEVELS, sample: "ア・イ・ウ", isVocab: false, badgePrefix: "katakana" },
+  vocabulary: { label: "Kosakata", levels: VOCAB_LEVELS, sample: "言葉", isVocab: true, badgePrefix: "vocab" },
 };
-const CATEGORY_ORDER = ["hiragana", "katakana", "vocabulary", "pola-kalimat"];
+const CATEGORY_ORDER = ["hiragana", "katakana", "vocabulary"];
 
 /* =========================================================================
    ENGINE — question banks, shuffling, no-repeat cycling
@@ -342,16 +263,6 @@ function buildVocabWriteBank(levelWords, levelId) {
   }));
 }
 
-function buildPatternQuestionBank(levelExamples, levelId, allExamplesPool) {
-  const allMeanings = allExamplesPool.map((e) => e.meaning);
-  return levelExamples.map((ex, idx) => ({
-    id: `pattern_L${levelId}_${idx}_m`, levelId, key: ex.jp, type: "mc",
-    prompt: `${ex.jp} artinya...`, correct: ex.meaning,
-    options: [ex.meaning, ...pickDistractors(ex.meaning, allMeanings)],
-    explanation: `${ex.jp} (${ex.romaji}) berarti '${ex.meaning}'.`,
-  }));
-}
-
 // Ad-hoc bank for the "Perlu Diulang" review flow, built from a handful of frequently-missed
 // items (which may span several levels). Pads the distractor pool from the full category
 // dataset when the review set itself is too small to offer 4 options.
@@ -430,11 +341,6 @@ function getLevelSet(category, levelId) {
 // for kana), or "mixed" (both — used for Tes, so a level's final test draws from both styles).
 function getBankForLevel(category, levelId, questionType) {
   const level = getLevelSet(category, levelId);
-  const meta = CATEGORY_META[category];
-  if (meta.contentType === "pattern") {
-    const allExamples = meta.levels.flatMap((l) => l.examples);
-    return buildPatternQuestionBank(level.examples, levelId, allExamples);
-  }
   const prefix = category === "hiragana" ? "hira" : "kata";
   const isVocab = category === "vocabulary";
   const mcBank = isVocab ? buildVocabQuestionBank(level.words, levelId) : buildKanaQuestionBank(level.chars, levelId, prefix);
@@ -480,7 +386,7 @@ function mergeWithDefaults(parsed) {
   };
 }
 
-function categoryMaxLevel(cat) { return CATEGORY_META[cat].levels.length; }
+function categoryMaxLevel(cat) { return cat === "vocabulary" ? 8 : 7; }
 function addBadge(list, id) { return list.includes(id) ? list : [...list, id]; }
 function isCategoryFullyPassed(state, cat) {
   const max = categoryMaxLevel(cat);
@@ -489,9 +395,9 @@ function isCategoryFullyPassed(state, cat) {
   return true;
 }
 function isCategoryUnlocked(state, cat) {
-  const idx = CATEGORY_ORDER.indexOf(cat);
-  if (idx <= 0) return true;
-  return isCategoryFullyPassed(state, CATEGORY_ORDER[idx - 1]);
+  if (cat === "hiragana") return true;
+  if (cat === "katakana") return isCategoryFullyPassed(state, "hiragana");
+  return isCategoryFullyPassed(state, "katakana");
 }
 function isLevelUnlocked(state, cat, levelId) {
   if (!isCategoryUnlocked(state, cat)) return false;
@@ -847,6 +753,146 @@ function StrokeGuidePanel({ char }) {
 // correct shape as a hint and loops back to drawing; after MAX_DRAW_ATTEMPTS wrong tries the
 // full stroke-order guide is revealed and the question is marked done either way, so the
 // learner is never stuck forever on one character.
+function DrawQuestion({ current, onAttempt }) {
+  const canvasRef = useRef(null);
+  const isDrawing = useRef(false);
+  const lastPos = useRef({ x: 0, y: 0 });
+  const [hasDrawn, setHasDrawn] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [feedback, setFeedback] = useState(null); // null | "correct" | "incorrect"
+  const [resolved, setResolved] = useState(false);
+  const [wrongAttempts, setWrongAttempts] = useState(0);
+  const [showGuide, setShowGuide] = useState(false);
+  const capped = wrongAttempts >= MAX_DRAW_ATTEMPTS;
+
+  function fillWhite() {
+    const ctx = canvasRef.current.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+  }
+  useEffect(() => { fillWhite(); }, []);
+
+  function getPos(e) {
+    const rect = canvasRef.current.getBoundingClientRect();
+    const t = e.touches && e.touches.length ? e.touches[0] : null;
+    return { x: (t ? t.clientX : e.clientX) - rect.left, y: (t ? t.clientY : e.clientY) - rect.top };
+  }
+  function startDraw(e) {
+    if (checking || resolved || capped) return;
+    e.preventDefault();
+    isDrawing.current = true;
+    lastPos.current = getPos(e);
+    setHasDrawn(true);
+  }
+  function drawMove(e) {
+    if (!isDrawing.current) return;
+    e.preventDefault();
+    const ctx = canvasRef.current.getContext("2d");
+    const pos = getPos(e);
+    ctx.strokeStyle = "#1c1917";
+    ctx.lineWidth = 10;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+    ctx.moveTo(lastPos.current.x, lastPos.current.y);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    lastPos.current = pos;
+  }
+  function endDraw() { isDrawing.current = false; }
+  function clearCanvas() {
+    if (checking || resolved || capped) return;
+    fillWhite();
+    setHasDrawn(false);
+    setFeedback(null);
+  }
+
+  async function checkAnswer() {
+    if (checking || resolved || capped || !hasDrawn) return;
+    setChecking(true);
+    setFeedback(null);
+    const { iou, coverage } = await scoreDrawing(canvasRef.current, current.correct);
+    const isCorrect = iou >= 0.28 || coverage >= 0.55;
+    setChecking(false);
+
+    if (isCorrect) {
+      setFeedback("correct");
+      setResolved(true);
+      onAttempt(true);
+      return;
+    }
+
+    const nextWrong = wrongAttempts + 1;
+    setWrongAttempts(nextWrong);
+    setFeedback("incorrect");
+    if (nextWrong >= MAX_DRAW_ATTEMPTS) {
+      // Out of attempts: the guide below renders automatically (capped === true), and the
+      // parent is told to mark this question as done so the learner can move on.
+      onAttempt(false, { capped: true });
+    } else {
+      onAttempt(false); // logs a miss for "Perlu Diulang" even though the question stays open
+    }
+  }
+
+  return (
+    <div className="mt-6 flex flex-col items-center">
+      <canvas
+        ref={canvasRef}
+        width={260}
+        height={260}
+        onMouseDown={startDraw}
+        onMouseMove={drawMove}
+        onMouseUp={endDraw}
+        onMouseLeave={endDraw}
+        onTouchStart={startDraw}
+        onTouchMove={drawMove}
+        onTouchEnd={endDraw}
+        className="touch-none rounded-xl border-2 border-stone-300 bg-white shadow-sm"
+      />
+      {!resolved && !capped && (
+        <p className="mt-2 text-xs text-stone-400">Percobaan ke-{wrongAttempts + 1} dari {MAX_DRAW_ATTEMPTS}</p>
+      )}
+      {!capped && (
+        <div className="mt-3 flex gap-2">
+          <button onClick={clearCanvas} disabled={checking || resolved} type="button" className="flex items-center gap-1.5 rounded-lg bg-stone-100 px-4 py-2 text-sm font-semibold text-stone-600 hover:bg-stone-200 disabled:opacity-40">
+            <Eraser size={14} /> Hapus
+          </button>
+          {!resolved && (
+            <button onClick={checkAnswer} disabled={!hasDrawn || checking} type="button" className="rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-40">
+              {checking ? "Memeriksa..." : "Periksa Jawaban"}
+            </button>
+          )}
+        </div>
+      )}
+      {feedback === "incorrect" && !capped && (
+        <div className="mt-4 text-center">
+          <p className="text-sm font-semibold text-rose-600">Belum sesuai, coba lagi ya!</p>
+          <p className="mt-2 text-xs text-stone-500">Bentuk yang benar:</p>
+          <p className="font-display text-4xl font-bold text-stone-700">{current.correct}</p>
+        </div>
+      )}
+      {resolved && (
+        <p className="mt-4 font-display text-2xl font-bold text-emerald-600">Benar! ✓</p>
+      )}
+      {capped && (
+        <p className="mt-4 text-center text-sm font-semibold text-rose-600">
+          Sudah {MAX_DRAW_ATTEMPTS}x percobaan — ini cara menulisnya yang benar:
+        </p>
+      )}
+      {!resolved && !capped && !showGuide && (
+        <button
+          onClick={() => setShowGuide(true)}
+          type="button"
+          className="mt-3 text-xs font-semibold text-stone-400 underline decoration-dotted hover:text-red-700"
+        >
+          Lihat cara menulis
+        </button>
+      )}
+      {(capped || (!resolved && showGuide)) && <StrokeGuidePanel char={current.correct} />}
+    </div>
+  );
+}
+
 function LoadingScreen() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-3">
@@ -988,6 +1034,14 @@ function AccountGate({ onEnter }) {
     onEnter(account);
   }
 
+  function handleDelete(a) {
+    const ok = window.confirm(
+      `Hapus akun "${a.displayName}"? Semua progresnya akan hilang permanen dan tidak bisa dikembalikan. Kalau ada yang masuk lagi dengan nama ini nanti, progresnya mulai dari nol.`
+    );
+    if (!ok) return;
+    deleteAccountProgress(a.slug);
+  }
+
   return (
     <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
       <p className="font-display text-2xl font-bold text-stone-900">Masuk ke Nihongo Step</p>
@@ -1023,16 +1077,31 @@ function AccountGate({ onEnter }) {
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             {accounts.map((a) => (
-              <button
+              <div
                 key={a.slug}
-                onClick={() => enterWith(a.displayName)}
-                type="button"
-                className="rounded-full bg-stone-100 px-3 py-1.5 text-sm font-semibold text-stone-700 hover:bg-stone-200"
+                className="flex items-center gap-1 rounded-full bg-stone-100 py-1 pl-3 pr-1.5"
               >
-                {a.displayName}
-              </button>
+                <button
+                  onClick={() => enterWith(a.displayName)}
+                  type="button"
+                  className="text-sm font-semibold text-stone-700 hover:text-red-700"
+                >
+                  {a.displayName}
+                </button>
+                <button
+                  onClick={() => handleDelete(a)}
+                  type="button"
+                  title={`Hapus akun "${a.displayName}"`}
+                  className="flex h-5 w-5 items-center justify-center rounded-full text-stone-400 hover:bg-rose-100 hover:text-rose-600"
+                >
+                  <X size={12} strokeWidth={3} />
+                </button>
+              </div>
             ))}
           </div>
+          <p className="mt-2 text-[11px] text-stone-400">
+            Tanda × di sebelah nama untuk menghapus akun itu beserta progresnya.
+          </p>
         </div>
       )}
     </div>
@@ -1244,7 +1313,6 @@ function HubView({ mode, category, data, onPickCategory, onBackToCategories, onS
 
 function MateriView({ category, levelId, onBack, onStartPractice, onStartWrite, onStartTest }) {
   const level = getLevelSet(category, levelId);
-  const contentType = CATEGORY_META[category].contentType;
   const isVocab = CATEGORY_META[category].isVocab;
   if (!level) return null;
   return (
@@ -1254,58 +1322,34 @@ function MateriView({ category, levelId, onBack, onStartPractice, onStartWrite, 
           <ChevronLeft size={20} />
         </button>
         <div>
-          <p className="text-xs font-semibold text-red-700">{CATEGORY_META[category].label} · {contentType === "pattern" ? "Bab" : "Level"} {levelId}{contentType === "pattern" ? ` · ${level.jlpt}` : ""}</p>
+          <p className="text-xs font-semibold text-red-700">{CATEGORY_META[category].label} · Level {levelId}</p>
           <p className="font-display text-lg font-bold text-stone-900">{level.title}</p>
         </div>
       </div>
 
-      {contentType === "pattern" ? (
-        <div className="space-y-4">
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
-            <p className="text-xs font-semibold text-red-700">Pola Kalimat</p>
-            <p className="mt-1 font-display text-lg font-bold text-stone-900">{level.pattern}</p>
-          </div>
-          <p className="text-sm leading-relaxed text-stone-700">{level.explanation}</p>
-          <div className="space-y-2">
-            {level.examples.map((ex, i) => (
-              <div key={i} className="rounded-xl border border-stone-200 bg-white p-3 shadow-sm">
-                <div className="flex items-start justify-between gap-2">
-                  <p className="font-display text-base font-semibold text-stone-900">{ex.jp}</p>
-                  <SpeakerButton text={ex.jp} />
-                </div>
-                <p className="text-xs text-stone-500">{ex.romaji}</p>
-                <p className="mt-1 text-xs text-stone-600">{ex.meaning}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {isVocab ? level.words.map((w) => (
-            <div key={w.kanji || w.reading} className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
-              <div className="flex items-start justify-between gap-2">
-                <p className="font-display text-xl font-bold text-stone-900">{w.kanji || w.reading}</p>
-                <SpeakerButton text={w.kanji || w.reading} />
-              </div>
-              {w.kanji && <p className="text-sm text-stone-500">{w.reading}</p>}
-              <p className="mt-1 text-xs font-semibold text-red-700">{w.romaji} · {w.meaning}</p>
-              <p className="mt-2 text-xs leading-relaxed text-stone-400">{w.example}</p>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {isVocab ? level.words.map((w) => (
+          <div key={w.kanji || w.reading} className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
+            <div className="flex items-start justify-between gap-2">
+              <p className="font-display text-xl font-bold text-stone-900">{w.kanji || w.reading}</p>
+              <SpeakerButton text={w.kanji || w.reading} />
             </div>
-          )) : level.chars.map((c) => (
-            <div key={c.char} className="flex flex-col items-center rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
-              <p className="font-display text-3xl font-bold text-stone-900">{c.char}</p>
-              <p className="mt-1 text-sm font-semibold text-stone-500">{c.romaji}</p>
-              <SpeakerButton text={c.char} className="mt-2" />
-            </div>
-          ))}
-        </div>
-      )}
+            {w.kanji && <p className="text-sm text-stone-500">{w.reading}</p>}
+            <p className="mt-1 text-xs font-semibold text-red-700">{w.romaji} · {w.meaning}</p>
+            <p className="mt-2 text-xs leading-relaxed text-stone-400">{w.example}</p>
+          </div>
+        )) : level.chars.map((c) => (
+          <div key={c.char} className="flex flex-col items-center rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
+            <p className="font-display text-3xl font-bold text-stone-900">{c.char}</p>
+            <p className="mt-1 text-sm font-semibold text-stone-500">{c.romaji}</p>
+            <SpeakerButton text={c.char} className="mt-2" />
+          </div>
+        ))}
+      </div>
 
       <div className="flex flex-col gap-2 pt-2">
         <button onClick={onStartPractice} className="rounded-xl bg-red-700 py-3 text-center font-semibold text-white transition hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-300" type="button">Mulai Latihan</button>
-        {contentType !== "pattern" && (
-          <button onClick={onStartWrite} className="rounded-xl border-2 border-red-200 bg-white py-3 text-center font-semibold text-red-700 transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-200" type="button">{isVocab ? "Latihan Menulis (Ketik)" : "Latihan Menulis (Tangan)"}</button>
-        )}
+        <button onClick={onStartWrite} className="rounded-xl border-2 border-red-200 bg-white py-3 text-center font-semibold text-red-700 transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-200" type="button">{isVocab ? "Latihan Menulis (Ketik)" : "Latihan Menulis (Tangan)"}</button>
         <button onClick={onStartTest} className="rounded-xl bg-stone-100 py-3 text-center font-semibold text-stone-700 transition hover:bg-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-300" type="button">Mulai Tes</button>
       </div>
     </div>
@@ -1386,14 +1430,7 @@ function QuizView({ data, category, levelId, mode, questionType, customBank, onE
   }
 
   function handleDrawAttempt(isCorrect, opts = {}) {
-    if (!current) return;
-    if (opts.reset) {
-      setAnswered(false);
-      setSelected(null);
-      setMissedKeysList((k) => k.filter((key) => key !== current.key));
-      return;
-    }
-    if (answered) return;
+    if (answered || !current) return;
     if (isCorrect) {
       setSelected(current.correct);
       setAnswered(true);
@@ -1499,7 +1536,7 @@ function QuizView({ data, category, levelId, mode, questionType, customBank, onE
       </div>
 
       {current.type === "draw" ? (
-        <WritingQuiz key={current.id} current={current} onAttempt={handleDrawAttempt} onNext={goNext} />
+        <DrawQuestion key={current.id} current={current} onAttempt={handleDrawAttempt} />
       ) : current.type === "write" ? (
         <div className="mt-8">
           <input
@@ -1751,10 +1788,7 @@ function NihongoStepAppInner({ account, onSwitchAccount }) {
   function startReview(category, keys) {
     const levels = CATEGORY_META[category].levels;
     let bank;
-    if (CATEGORY_META[category].contentType === "pattern") {
-      const items = levels.flatMap((l) => l.examples).filter((e) => keys.includes(e.jp));
-      bank = buildPatternQuestionBank(items, null, levels.flatMap((l) => l.examples));
-    } else if (category === "vocabulary") {
+    if (category === "vocabulary") {
       const items = keys.map((k) => findVocabByKey(levels, k)).filter(Boolean);
       bank = buildFocusedVocabBank(items, levels);
     } else {
@@ -1777,10 +1811,8 @@ function NihongoStepAppInner({ account, onSwitchAccount }) {
           onBackToCategories={() => setRoute({ view: "hub", mode: route.mode })}
           onSelectLevel={(category, levelId) => {
             if (route.mode === "belajar") setRoute({ view: "materi", category, levelId });
-            else if (route.mode === "latihan") {
-              if (CATEGORY_META[category].contentType === "pattern") goToQuiz({ category, levelId, mode: "practice", questionType: "mc" });
-              else setRoute({ view: "latihan-choice", category, levelId });
-            } else goToQuiz({ category, levelId, mode: "test", questionType: "mixed" });
+            else if (route.mode === "latihan") setRoute({ view: "latihan-choice", category, levelId });
+            else goToQuiz({ category, levelId, mode: "test", questionType: "mixed" });
           }}
         />
       );

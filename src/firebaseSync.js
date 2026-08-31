@@ -104,3 +104,19 @@ export async function pushUserProgress(slug, state) {
     console.error("Sinkronisasi Firebase (simpan) gagal:", error);
   }
 }
+
+// Menghapus akun & seluruh progresnya secara permanen. Karena tidak ada lagi logika yang
+// otomatis "mengisi ulang" dari cadangan lokal saat data kosong (lihat komentar di
+// NihongoStepAppInner di App.jsx), begitu dihapus di sini akun itu benar-benar bersih —
+// kalau ada yang masuk lagi dengan nama yang sama persis di kemudian hari, progresnya mulai
+// dari nol, bukan progres lama yang muncul lagi.
+export async function deleteAccountProgress(slug) {
+  if (!isFirebaseEnabled() || !slug) return;
+  try {
+    const fb = await loadFirebase();
+    if (!fb) return;
+    await fb.set(fb.ref(fb.db, `${USERS_PATH}/${slug}`), null);
+  } catch (error) {
+    console.error("Gagal menghapus akun:", error);
+  }
+}
