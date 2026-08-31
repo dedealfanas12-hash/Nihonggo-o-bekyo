@@ -1141,7 +1141,7 @@ function DashboardView({ data, onNavigate, account, onSwitchAccount }) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-display text-2xl font-bold text-stone-900">Selamat datang, Namily!</p>
-          <p className="mt-1 text-sm text-stone-500">Satu langkah setiap hari membawamu semakin dekat.</p>
+          <p className="mt-1 text-sm text-stone-500">Semangat ya Belajarnya!</p>
         </div>
         <SyncStatusBadge account={account} onSwitchAccount={onSwitchAccount} />
       </div>
