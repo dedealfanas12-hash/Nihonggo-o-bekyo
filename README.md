@@ -135,3 +135,8 @@ nihongo-step/
 ## Catatan penyimpanan progres
 
 Tanpa setup Firebase: progres disimpan lewat `window.storage` jika tersedia (mis. saat berjalan sebagai Claude artifact), dan otomatis jatuh ke `localStorage` browser saat di-deploy sebagai situs biasa — tidak ada setup tambahan, tapi progresnya khusus perangkat itu saja. Dengan Firebase disetel (lihat bagian "Progres bersama & real-time" di atas), `localStorage` tetap dipakai sebagai cadangan lokal, tapi Firebase Realtime Database yang jadi sumber utama & disinkron ke semua perangkat.
+
+
+## Tambahan: Pola Kalimat
+
+Aplikasi juga memiliki kategori **Pola Kalimat** dengan 10 bab dasar N5. Setiap bab berisi pola, penjelasan, contoh kalimat, audio, serta latihan pilihan ganda berdasarkan contoh kalimat.
