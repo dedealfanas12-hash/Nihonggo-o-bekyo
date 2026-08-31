@@ -268,8 +268,9 @@ function buildVocabQuestionBank(levelWords, levelId) {
       options: [w.reading, ...pickDistractors(w.reading, allReadings)],
       explanation: `'${w.meaning}' = ${w.reading} (${w.romaji}).`,
     });
-  });
-  return bank;
+// UBAH BARIS 271 DAN 272 MENJADI:
+const strokeOk = true;
+const isCorrect = matchRatio >= 0.25;
 }
 
 // One typed-answer question per word: shown the reading, the learner types the Indonesian
