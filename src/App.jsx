@@ -447,9 +447,9 @@ function applyTestResult(state, cat, levelId, scorePct) {
   return next;
 }
 function scoreLabel(pct) {
-  if (pct >= 90) return "Sangat Baik";
-  if (pct >= 80) return "Baik";
-  if (pct >= 70) return "Cukup";
+  if (pct >= 100) return "Sangat Baik";
+  if (pct >= 90) return "Baik";
+  if (pct >= 80) return "Cukup";
   return "Ulangi";
 }
 
