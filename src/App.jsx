@@ -437,7 +437,7 @@ function overallProgressPct(state) {
 function applyTestResult(state, cat, levelId, scorePct) {
   const next = JSON.parse(JSON.stringify(state));
   const ls = next.categories[cat].levelStatus;
-  const passed = scorePct >= 80;
+  const passed = scorePct >= 70;
   const prev = ls[levelId] || { bestScore: 0, passed: false };
   ls[levelId] = { bestScore: Math.max(prev.bestScore, scorePct), passed: prev.passed || passed };
   next.xp += passed ? 50 : 0;
