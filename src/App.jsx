@@ -1700,35 +1700,32 @@ function NihongoStepAppInner({ account, onSwitchAccount }) {
 
   // Progres: kalau firebaseConfig sudah diisi (lihat src/firebaseConfig.js) DAN sebuah akun
   // sudah dipilih lewat AccountGate, progres akun itu di Firebase Realtime Database jadi
-  // sumber kebenaran dan disinkron real-time ke semua perangkat yang masuk dengan nama akun
-  // yang sama. Kalau Firebase belum disetel, aplikasi berjalan seperti biasa dengan
-  // penyimpanan lokal per-perangkat saja — tidak ada perubahan perilaku.
+  // SATU-SATUNYA sumber kebenaran begitu akun itu aktif — kalau datanya kosong (akun baru
+  // ATAU baru saja direset manual lewat Firebase Console), mulai dari nol. Sengaja TIDAK
+  // ditimpa lagi dari cadangan lokal lama, supaya reset manual di Firebase Console benar-benar
+  // berlaku (sebelumnya ini jadi bug: data yang dihapus manual otomatis "hidup lagi" dari
+  // cadangan lokal browser yang masih membuka halaman itu). Kalau Firebase belum disetel,
+  // aplikasi berjalan seperti biasa dengan penyimpanan lokal per-perangkat saja.
   useEffect(() => {
     let alive = true;
     let unsubscribe = () => {};
-    loadProgress().then((localLoaded) => {
-      if (!alive) return;
-      if (!isFirebaseEnabled() || !slug) {
-        setData(localLoaded);
-        setLoading(false);
-        return;
-      }
+
+    if (isFirebaseEnabled() && slug) {
       unsubscribe = subscribeUserProgress(slug, (remote) => {
         if (!alive) return;
-        if (remote) {
-          const merged = mergeWithDefaults(remote);
-          setData((prev) => (prev && prev._syncedAt > merged._syncedAt ? prev : merged));
-        } else {
-          // Akun baru / belum pernah ada progresnya di Firebase — jadikan progres lokal
-          // perangkat ini titik awal, lalu unggah supaya perangkat lain yang masuk dengan
-          // nama akun yang sama ikut melihatnya.
-          const seeded = { ...localLoaded, displayName: account && account.displayName, _syncedAt: Date.now() };
-          pushUserProgress(slug, seeded);
-          setData(seeded);
-        }
+        const merged = remote ? mergeWithDefaults(remote) : createDefaultState();
+        setData((prev) => (prev && prev._syncedAt > merged._syncedAt ? prev : merged));
         setLoading(false);
       });
-    });
+    } else {
+      loadProgress().then((localLoaded) => {
+        if (alive) {
+          setData(localLoaded);
+          setLoading(false);
+        }
+      });
+    }
+
     return () => { alive = false; unsubscribe(); };
   }, [slug]);
 
