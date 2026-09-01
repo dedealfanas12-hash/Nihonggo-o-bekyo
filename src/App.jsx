@@ -700,13 +700,14 @@ function drawStippledGlyph(canvas, char) {
     return data[i] < 200 || data[i + 1] < 200 || data[i + 2] < 200;
   };
 
-  const spacing = Math.max(4, Math.round(size / 34));
-  ctx.fillStyle = "rgba(28,25,23,0.32)";
+  const spacing = Math.max(3, Math.round(size / 32));
+  const radius = spacing * 0.58;
+  ctx.fillStyle = "rgba(28,25,23,0.68)";
   for (let y = 0; y < size; y += spacing) {
     for (let x = 0; x < size; x += spacing) {
       if (isInk(x, y)) {
         ctx.beginPath();
-        ctx.arc(x, y, spacing * 0.22, 0, Math.PI * 2);
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
         ctx.fill();
       }
     }
@@ -719,7 +720,7 @@ function drawStippledGlyph(canvas, char) {
 // `visibleCount` opsional: kalau diisi, cuma nomor goresan 1..visibleCount yang ditampilkan
 // (dipakai animasi "Putar" di StrokeGuidePanel). Kalau tidak diisi, semua nomor tampil sekaligus
 // seperti semula.
-function StrokeOrderImage({ char, size = 176, visibleCount }) {
+function StrokeOrderImage({ char, size = 140, visibleCount }) {
   const canvasRef = useRef(null);
   const guide = getStrokeGuide(char);
 
@@ -739,7 +740,7 @@ function StrokeOrderImage({ char, size = 176, visibleCount }) {
         return (
           <span
             key={i}
-            className={`absolute flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-700 text-xs font-bold text-white shadow transition-transform duration-300 ${
+            className={`absolute flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-700 text-[10px] font-bold text-white shadow transition-transform duration-300 ${
               isLatest ? "scale-125 ring-4 ring-amber-300" : ""
             }`}
             style={{ left: `${px * 100}%`, top: `${py * 100}%` }}
@@ -792,43 +793,45 @@ function StrokeGuidePanel({ char }) {
   const activeIdx = playing ? visibleCount - 1 : -1;
 
   return (
-    <div className="mt-4 w-full max-w-xs rounded-2xl border-2 border-amber-200 bg-amber-50 p-4 text-left">
+    <div className="mt-4 w-full max-w-md rounded-2xl border-2 border-amber-200 bg-amber-50 p-4 text-left">
       <div className="flex items-center justify-between">
         <p className="text-sm font-bold text-amber-800">Panduan Cara Menulis</p>
         <p className="text-xs font-semibold text-amber-700">{guide.strokes} goresan</p>
       </div>
-      <div className="mt-3 flex justify-center">
-        <StrokeOrderImage char={char} visibleCount={visibleCount} />
+      {/* Kotak gambar & daftar langkah berdampingan (bukan bertumpuk), supaya semuanya kelihatan
+          tanpa perlu gulir jauh — daftar langkahnya sendiri yang scroll kalau kepanjangan. */}
+      <div className="mt-3 flex gap-3">
+        <div className="flex shrink-0 flex-col items-center gap-2">
+          <StrokeOrderImage char={char} visibleCount={visibleCount} />
+          <button
+            onClick={playAnimation}
+            disabled={playing}
+            type="button"
+            className="flex items-center gap-1 whitespace-nowrap rounded-full bg-amber-400 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-amber-500 disabled:opacity-50"
+          >
+            <Play size={11} />
+            {playing ? "Memutar..." : "Putar Ulang"}
+          </button>
+        </div>
+        <ol className="max-h-52 flex-1 space-y-1.5 overflow-y-auto pr-1">
+          {guide.steps.map((step, i) => (
+            <li
+              key={i}
+              className={`flex items-start gap-1.5 rounded-lg p-1.5 text-xs text-stone-700 transition-colors duration-300 ${
+                i === activeIdx ? "bg-amber-200/70 font-semibold" : ""
+              }`}
+            >
+              <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-700 text-[10px] font-bold text-white">
+                {i + 1}
+              </span>
+              <span>{step}</span>
+            </li>
+          ))}
+        </ol>
       </div>
-      <div className="mt-2 flex items-center justify-center">
-        <button
-          onClick={playAnimation}
-          disabled={playing}
-          type="button"
-          className="flex items-center gap-1.5 rounded-full bg-amber-400 px-3 py-1 text-xs font-bold text-white hover:bg-amber-500 disabled:opacity-50"
-        >
-          <Play size={12} />
-          {playing ? "Memutar..." : "Putar Ulang"}
-        </button>
-      </div>
-      <p className="mt-2 text-center text-[11px] text-amber-700">
+      <p className="mt-2 text-center text-[10px] text-amber-700">
         Angka = urutan goresan (posisi perkiraan) — ikuti bentuk titik-titik samarnya.
       </p>
-      <ol className="mt-3 space-y-2">
-        {guide.steps.map((step, i) => (
-          <li
-            key={i}
-            className={`flex items-start gap-2 rounded-lg p-1.5 text-sm text-stone-700 transition-colors duration-300 ${
-              i === activeIdx ? "bg-amber-200/70 font-semibold" : ""
-            }`}
-          >
-            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-700 text-xs font-bold text-white">
-              {i + 1}
-            </span>
-            <span>{step}</span>
-          </li>
-        ))}
-      </ol>
     </div>
   );
 }
