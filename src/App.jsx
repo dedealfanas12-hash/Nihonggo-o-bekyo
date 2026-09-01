@@ -268,9 +268,8 @@ function buildVocabQuestionBank(levelWords, levelId) {
       options: [w.reading, ...pickDistractors(w.reading, allReadings)],
       explanation: `'${w.meaning}' = ${w.reading} (${w.romaji}).`,
     });
-// UBAH BARIS 271 DAN 272 MENJADI:
-const strokeOk = true;
-const isCorrect = matchRatio >= 0.25;
+  });
+  return bank;
 }
 
 // One typed-answer question per word: shown the reading, the learner types the Indonesian
@@ -438,7 +437,7 @@ function overallProgressPct(state) {
 function applyTestResult(state, cat, levelId, scorePct) {
   const next = JSON.parse(JSON.stringify(state));
   const ls = next.categories[cat].levelStatus;
-  const passed = scorePct >= 50;
+  const passed = scorePct >= 80;
   const prev = ls[levelId] || { bestScore: 0, passed: false };
   ls[levelId] = { bestScore: Math.max(prev.bestScore, scorePct), passed: prev.passed || passed };
   next.xp += passed ? 50 : 0;
@@ -448,9 +447,9 @@ function applyTestResult(state, cat, levelId, scorePct) {
   return next;
 }
 function scoreLabel(pct) {
-  if (pct >= 100) return "Sangat Baik";
-  if (pct >= 90) return "Baik";
-  if (pct >= 80) return "Cukup";
+  if (pct >= 90) return "Sangat Baik";
+  if (pct >= 80) return "Baik";
+  if (pct >= 70) return "Cukup";
   return "Ulangi";
 }
 
@@ -601,8 +600,11 @@ function SpeakerButton({ text, className }) {
 
 // Compares a hand-drawn canvas against the real character rendered by the browser's own font
 // (so the reference shape is always accurate — never hand-authored by Claude). Downsamples both
-// to a small grid and scores overlap (Intersection-over-Union) plus how much of the reference
-// shape got covered. No AI, no network call — pure client-side geometry.
+// to a grid and returns three metrics: `iou` (Intersection-over-Union — penalizes both missed
+// target area AND stray extra ink), `recall` (how much of the target got covered — ignores
+// extra ink on its own), and `precision` (how much of the user's ink actually landed on target —
+// ignores missed target area on its own). No AI, no network call — pure client-side geometry.
+// Deciding pass/fail from these lives in the caller (DrawQuestion), combined with stroke count.
 async function scoreDrawing(canvas, targetChar) {
   if (document.fonts && document.fonts.ready) {
     try { await document.fonts.ready; } catch (e) {}
@@ -628,9 +630,9 @@ async function scoreDrawing(canvas, targetChar) {
     return data[i] < 200 || data[i + 1] < 200 || data[i + 2] < 200;
   }
 
-  const gridN = 24;
+  const gridN = 32;
   const cell = size / gridN;
-  let both = 0, either = 0, refFilled = 0;
+  let both = 0, either = 0, refFilled = 0, userFilled = 0;
   for (let gy = 0; gy < gridN; gy++) {
     for (let gx = 0; gx < gridN; gx++) {
       let uInk = false, rInk = false;
@@ -645,11 +647,14 @@ async function scoreDrawing(canvas, targetChar) {
       if (uInk && rInk) both++;
       if (uInk || rInk) either++;
       if (rInk) refFilled++;
+      if (uInk) userFilled++;
     }
   }
-  const iou = either > 0 ? both / either : 0;
-  const coverage = refFilled > 0 ? both / refFilled : 0;
-  return { iou, coverage };
+  return {
+    iou: either > 0 ? both / either : 0,
+    recall: refFilled > 0 ? both / refFilled : 0,
+    precision: userFilled > 0 ? both / userFilled : 0,
+  };
 }
 
 // Maximum wrong attempts allowed on a single handwriting question before the correct
@@ -837,6 +842,7 @@ function DrawQuestion({ current, onAttempt }) {
   const canvasRef = useRef(null);
   const isDrawing = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
+  const strokeCountRef = useRef(0); // berapa kali pena diangkat-turunkan sejak kanvas terakhir bersih
   const [hasDrawn, setHasDrawn] = useState(false);
   const [checking, setChecking] = useState(false);
   const [feedback, setFeedback] = useState(null); // null | "correct" | "incorrect"
@@ -861,6 +867,7 @@ function DrawQuestion({ current, onAttempt }) {
     if (checking || resolved || capped) return;
     e.preventDefault();
     isDrawing.current = true;
+    strokeCountRef.current += 1;
     lastPos.current = getPos(e);
     setHasDrawn(true);
   }
@@ -885,14 +892,33 @@ function DrawQuestion({ current, onAttempt }) {
     fillWhite();
     setHasDrawn(false);
     setFeedback(null);
+    strokeCountRef.current = 0;
   }
 
   async function checkAnswer() {
     if (checking || resolved || capped || !hasDrawn) return;
     setChecking(true);
     setFeedback(null);
-    const { iou, coverage } = await scoreDrawing(canvasRef.current, current.correct);
-    const isCorrect = iou >= 0.28 || coverage >= 0.55;
+    const { iou, recall, precision } = await scoreDrawing(canvasRef.current, current.correct);
+
+    // Jumlah goresan (berapa kali pena diangkat) itu sinyal kuat: huruf yang jumlah/pola
+    // goresannya jauh berbeda dari seharusnya kemungkinan besar salah walau kebetulan
+    // menyentuh area yang mirip. Kalau jauh beda (selisih ≥ 2), naikkan standar kecocokan
+    // bentuknya jauh lebih ketat — kalau dekat/sama, pakai standar normal.
+    const guide = getStrokeGuide(current.correct);
+    const expected = guide ? guide.strokes : null;
+    const strokeFarOff = expected != null && Math.abs(strokeCountRef.current - expected) >= 2;
+    const iouMin = strokeFarOff ? 0.55 : 0.40;
+    const recallMin = strokeFarOff ? 0.85 : 0.70;
+    const precisionMin = strokeFarOff ? 0.55 : 0.40;
+
+    // Lolos kalau bentuknya benar-benar mirip secara keseluruhan (IoU tinggi — ini menghukum
+    // baik area yang terlewat MAUPUN coretan berlebih di luar target), ATAU kalau sudah
+    // menutupi hampir semua target TANPA banyak coretan di luar target (recall & precision
+    // dua-duanya cukup tinggi). Sengaja TIDAK meloloskan hanya berdasar satu metrik saja —
+    // itulah yang sebelumnya bikin coretan sembarang yang kebetulan menyentuh area huruf bisa
+    // lolos meski bentuknya jelas berbeda.
+    const isCorrect = iou >= iouMin || (recall >= recallMin && precision >= precisionMin);
     setChecking(false);
 
     if (isCorrect) {
@@ -1202,7 +1228,7 @@ function DashboardView({ data, onNavigate, account, onSwitchAccount }) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-display text-2xl font-bold text-stone-900">Selamat datang, Namily!</p>
-          <p className="mt-1 text-sm text-stone-500">Semangat ya Belajarnya!</p>
+          <p className="mt-1 text-sm text-stone-500">Satu langkah setiap hari membawamu semakin dekat.</p>
         </div>
         <SyncStatusBadge account={account} onSwitchAccount={onSwitchAccount} />
       </div>
