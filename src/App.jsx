@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   Home, BookOpen, Pencil, Target, TrendingUp, Volume2, Lock, CheckCircle,
-  Flame, ChevronRight, ChevronLeft, X, RotateCcw, Star, Sparkles, ArrowRight, Trophy, Eraser,
+  Flame, ChevronRight, ChevronLeft, X, RotateCcw, Star, Sparkles, ArrowRight, Trophy, Eraser, Play,
 } from "lucide-react";
 import { getStrokeGuide } from "./strokeGuides.js";
 import {
@@ -710,7 +710,10 @@ function drawStippledGlyph(canvas, char) {
 // Dotted trace box + numbered badges showing where each stroke begins, using the `points`
 // data in strokeGuides.js — checked against real Noto Sans CJK JP glyph renders (not a blind
 // guess), so the numbers land on the actual shape instead of a generic text-derived zone.
-function StrokeOrderImage({ char, size = 176 }) {
+// `visibleCount` opsional: kalau diisi, cuma nomor goresan 1..visibleCount yang ditampilkan
+// (dipakai animasi "Putar" di StrokeGuidePanel). Kalau tidak diisi, semua nomor tampil sekaligus
+// seperti semula.
+function StrokeOrderImage({ char, size = 176, visibleCount }) {
   const canvasRef = useRef(null);
   const guide = getStrokeGuide(char);
 
@@ -719,28 +722,69 @@ function StrokeOrderImage({ char, size = 176 }) {
   }, [char]);
 
   if (!guide) return null;
+  const shown = typeof visibleCount === "number" ? visibleCount : guide.points.length;
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <canvas ref={canvasRef} width={size} height={size} className="rounded-xl bg-white" />
-      {guide.points.map(([px, py], i) => (
-        <span
-          key={i}
-          className="absolute flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-700 text-xs font-bold text-white shadow"
-          style={{ left: `${px * 100}%`, top: `${py * 100}%` }}
-        >
-          {i + 1}
-        </span>
-      ))}
+      {guide.points.map(([px, py], i) => {
+        if (i >= shown) return null;
+        const isLatest = i === shown - 1;
+        return (
+          <span
+            key={i}
+            className={`absolute flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-700 text-xs font-bold text-white shadow transition-transform duration-300 ${
+              isLatest ? "scale-125 ring-4 ring-amber-300" : ""
+            }`}
+            style={{ left: `${px * 100}%`, top: `${py * 100}%` }}
+          >
+            {i + 1}
+          </span>
+        );
+      })}
     </div>
   );
 }
 
+const STROKE_ANIM_STEP_MS = 900;
+
 // Full "how to write this" panel: dotted image + numbered steps — shown automatically once
 // MAX_DRAW_ATTEMPTS is reached, or any time earlier via the optional "Lihat cara menulis" link.
+// Auto-plays a step-by-step animation once when first shown (numbers appear one at a time,
+// synced with the matching text step highlighting) — a stand-in for a real video, built from
+// the same verified stroke data. "Putar Ulang" replays it any time.
 function StrokeGuidePanel({ char }) {
   const guide = getStrokeGuide(char);
+  const [visibleCount, setVisibleCount] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const timerRef = useRef(null);
+
+  function playAnimation() {
+    if (!guide) return;
+    clearInterval(timerRef.current);
+    setPlaying(true);
+    setVisibleCount(1);
+    let count = 1;
+    timerRef.current = setInterval(() => {
+      count += 1;
+      if (count > guide.steps.length) {
+        clearInterval(timerRef.current);
+        setPlaying(false);
+        return;
+      }
+      setVisibleCount(count);
+    }, STROKE_ANIM_STEP_MS);
+  }
+
+  useEffect(() => {
+    playAnimation();
+    return () => clearInterval(timerRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [char]);
+
   if (!guide) return null;
+  const activeIdx = playing ? visibleCount - 1 : -1;
+
   return (
     <div className="mt-4 w-full max-w-xs rounded-2xl border-2 border-amber-200 bg-amber-50 p-4 text-left">
       <div className="flex items-center justify-between">
@@ -748,14 +792,30 @@ function StrokeGuidePanel({ char }) {
         <p className="text-xs font-semibold text-amber-700">{guide.strokes} goresan</p>
       </div>
       <div className="mt-3 flex justify-center">
-        <StrokeOrderImage char={char} />
+        <StrokeOrderImage char={char} visibleCount={visibleCount} />
+      </div>
+      <div className="mt-2 flex items-center justify-center">
+        <button
+          onClick={playAnimation}
+          disabled={playing}
+          type="button"
+          className="flex items-center gap-1.5 rounded-full bg-amber-400 px-3 py-1 text-xs font-bold text-white hover:bg-amber-500 disabled:opacity-50"
+        >
+          <Play size={12} />
+          {playing ? "Memutar..." : "Putar Ulang"}
+        </button>
       </div>
       <p className="mt-2 text-center text-[11px] text-amber-700">
         Angka = urutan goresan (posisi perkiraan) — ikuti bentuk titik-titik samarnya.
       </p>
       <ol className="mt-3 space-y-2">
         {guide.steps.map((step, i) => (
-          <li key={i} className="flex items-start gap-2 text-sm text-stone-700">
+          <li
+            key={i}
+            className={`flex items-start gap-2 rounded-lg p-1.5 text-sm text-stone-700 transition-colors duration-300 ${
+              i === activeIdx ? "bg-amber-200/70 font-semibold" : ""
+            }`}
+          >
             <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-700 text-xs font-bold text-white">
               {i + 1}
             </span>
