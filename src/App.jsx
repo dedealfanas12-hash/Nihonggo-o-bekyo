@@ -268,8 +268,9 @@ function buildVocabQuestionBank(levelWords, levelId) {
       options: [w.reading, ...pickDistractors(w.reading, allReadings)],
       explanation: `'${w.meaning}' = ${w.reading} (${w.romaji}).`,
     });
-  });
-  return bank;
+// UBAH BARIS 271 DAN 272 MENJADI:
+const strokeOk = true;
+const isCorrect = matchRatio >= 0.25;
 }
 
 // One typed-answer question per word: shown the reading, the learner types the Indonesian
@@ -437,7 +438,7 @@ function overallProgressPct(state) {
 function applyTestResult(state, cat, levelId, scorePct) {
   const next = JSON.parse(JSON.stringify(state));
   const ls = next.categories[cat].levelStatus;
-  const passed = scorePct >= 80;
+  const passed = scorePct >= 50;
   const prev = ls[levelId] || { bestScore: 0, passed: false };
   ls[levelId] = { bestScore: Math.max(prev.bestScore, scorePct), passed: prev.passed || passed };
   next.xp += passed ? 50 : 0;
@@ -447,9 +448,9 @@ function applyTestResult(state, cat, levelId, scorePct) {
   return next;
 }
 function scoreLabel(pct) {
-  if (pct >= 90) return "Sangat Baik";
-  if (pct >= 80) return "Baik";
-  if (pct >= 70) return "Cukup";
+  if (pct >= 100) return "Sangat Baik";
+  if (pct >= 90) return "Baik";
+  if (pct >= 80) return "Cukup";
   return "Ulangi";
 }
 
@@ -1201,7 +1202,7 @@ function DashboardView({ data, onNavigate, account, onSwitchAccount }) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-display text-2xl font-bold text-stone-900">Selamat datang, Namily!</p>
-          <p className="mt-1 text-sm text-stone-500">Satu langkah setiap hari membawamu semakin dekat.</p>
+          <p className="mt-1 text-sm text-stone-500">Semangat ya Belajarnya!</p>
         </div>
         <SyncStatusBadge account={account} onSwitchAccount={onSwitchAccount} />
       </div>
