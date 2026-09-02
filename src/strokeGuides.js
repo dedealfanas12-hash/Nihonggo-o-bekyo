@@ -474,13 +474,22 @@ export function getStrokeGuide(char) {
     const smallBig = SMALL_TO_BIG[smallChar];
     if (!mainGuide) return null;
     const smallGuide = smallBig ? STROKE_GUIDES[smallBig] : null;
+    // Di kombinasi yōon, huruf utama digambar lebih kecil & digeser ke kiri-atas (bukan
+    // memenuhi kotak seperti huruf tunggal biasa) supaya huruf kecilnya muat di kanan-bawah —
+    // lihat renderReferenceGlyph di App.jsx. Titik-titik goresan huruf utama perlu mengikuti
+    // skala & posisi yang sama, kalau tidak nomornya akan meleset dari gambar hurufnya.
+    const SCALE = 0.6 / 0.72;
+    const mainPoints = mainGuide.points.map(([x, y]) => [
+      0.4 + (x - 0.5) * SCALE,
+      0.42 + (y - 0.5) * SCALE,
+    ]);
     return {
       strokes: mainGuide.strokes + (smallGuide ? smallGuide.strokes : 0),
       steps: [
         ...mainGuide.steps,
         `Setelah itu, tulis "${smallBig || smallChar}" dalam ukuran KECIL di sisi kanan-bawah — goresannya sama seperti huruf biasa, hanya diperkecil dan diturunkan sedikit.`,
       ],
-      points: [...mainGuide.points, [0.8, 0.8]],
+      points: [...mainPoints, [0.74, 0.72]],
     };
   }
 

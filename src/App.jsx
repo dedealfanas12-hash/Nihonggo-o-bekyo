@@ -598,6 +598,31 @@ function SpeakerButton({ text, className }) {
   );
 }
 
+// Menggambar karakter target ke sebuah canvas 2D context, dengan font asli browser — dipakai
+// bersama oleh scoreDrawing (buat menilai) dan drawStippledGlyph (buat panduan visual) supaya
+// keduanya SELALU konsisten satu sama lain. Menangani dua kasus:
+//  - karakter dasar (1 code point, termasuk dakuten/handakuten): satu fillText biasa, besar.
+//  - kombinasi yōon (2 code point, mis. "りゃ"): TIDAK ditulis apa adanya (browser akan
+//    menaruh keduanya berdampingan di ukuran penuh dan meluber keluar kotak) — sebagai
+//    gantinya karakter utama digambar besar di kiri-atas, karakter kecilnya digambar lebih
+//    kecil di kanan-bawah, meniru cara huruf yōon sungguhan ditulis.
+function renderReferenceGlyph(ctx, char, size) {
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = "#000000";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  if (char.length >= 2) {
+    ctx.font = `${Math.floor(size * 0.6)}px "Noto Sans JP", sans-serif`;
+    ctx.fillText(char[0], size * 0.4, size * 0.42);
+    ctx.font = `${Math.floor(size * 0.34)}px "Noto Sans JP", sans-serif`;
+    ctx.fillText(char[1], size * 0.74, size * 0.72);
+  } else {
+    ctx.font = `${Math.floor(size * 0.72)}px "Noto Sans JP", sans-serif`;
+    ctx.fillText(char, size / 2, size / 2 + size * 0.03);
+  }
+}
+
 // Compares a hand-drawn canvas against the real character rendered by the browser's own font
 // (so the reference shape is always accurate — never hand-authored by Claude). Downsamples both
 // to a grid and returns three metrics: `iou` (Intersection-over-Union — penalizes both missed
@@ -614,13 +639,7 @@ async function scoreDrawing(canvas, targetChar) {
   refCanvas.width = size;
   refCanvas.height = size;
   const rctx = refCanvas.getContext("2d");
-  rctx.fillStyle = "#ffffff";
-  rctx.fillRect(0, 0, size, size);
-  rctx.fillStyle = "#000000";
-  rctx.font = `${Math.floor(size * 0.72)}px "Noto Sans JP", sans-serif`;
-  rctx.textAlign = "center";
-  rctx.textBaseline = "middle";
-  rctx.fillText(targetChar, size / 2, size / 2 + size * 0.03);
+  renderReferenceGlyph(rctx, targetChar, size);
 
   const uctx = canvas.getContext("2d");
   const uData = uctx.getImageData(0, 0, size, size).data;
@@ -687,13 +706,7 @@ function drawStippledGlyph(canvas, char) {
   const off = document.createElement("canvas");
   off.width = size; off.height = size;
   const octx = off.getContext("2d");
-  octx.fillStyle = "#ffffff";
-  octx.fillRect(0, 0, size, size);
-  octx.fillStyle = "#000000";
-  octx.font = `${Math.floor(size * 0.72)}px "Noto Sans JP", sans-serif`;
-  octx.textAlign = "center";
-  octx.textBaseline = "middle";
-  octx.fillText(char, size / 2, size / 2 + size * 0.03);
+  renderReferenceGlyph(octx, char, size);
   const data = octx.getImageData(0, 0, size, size).data;
   const isInk = (x, y) => {
     const i = (y * size + x) * 4;
