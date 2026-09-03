@@ -4,6 +4,7 @@ import {
   Flame, ChevronRight, ChevronLeft, X, RotateCcw, Star, Sparkles, ArrowRight, Trophy, Eraser, Play,
 } from "lucide-react";
 import { getStrokeGuide } from "./strokeGuides.js";
+import { WIKI_STROKE_GIF } from "./wikiStrokeGif.js";
 import {
   isFirebaseEnabled,
   slugifyAccountName,
@@ -777,7 +778,10 @@ function StrokeGuidePanel({ char }) {
   const guide = getStrokeGuide(char);
   const [visibleCount, setVisibleCount] = useState(0);
   const [playing, setPlaying] = useState(false);
+  const [wikiFailed, setWikiFailed] = useState(false);
   const timerRef = useRef(null);
+  const wikiUrl = WIKI_STROKE_GIF[char];
+  const useWiki = !!wikiUrl && !wikiFailed;
 
   function playAnimation() {
     if (!guide) return;
@@ -797,7 +801,8 @@ function StrokeGuidePanel({ char }) {
   }
 
   useEffect(() => {
-    playAnimation();
+    setWikiFailed(false);
+    if (!useWiki) playAnimation();
     return () => clearInterval(timerRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [char]);
@@ -815,16 +820,30 @@ function StrokeGuidePanel({ char }) {
           tanpa perlu gulir jauh — daftar langkahnya sendiri yang scroll kalau kepanjangan. */}
       <div className="mt-3 flex gap-3">
         <div className="flex shrink-0 flex-col items-center gap-2">
-          <StrokeOrderImage char={char} visibleCount={visibleCount} />
-          <button
-            onClick={playAnimation}
-            disabled={playing}
-            type="button"
-            className="flex items-center gap-1 whitespace-nowrap rounded-full bg-amber-400 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-amber-500 disabled:opacity-50"
-          >
-            <Play size={11} />
-            {playing ? "Memutar..." : "Putar Ulang"}
-          </button>
+          {useWiki ? (
+            <img
+              src={wikiUrl}
+              alt={`Animasi urutan goresan menulis ${char}`}
+              width={140}
+              height={140}
+              onError={() => setWikiFailed(true)}
+              className="rounded-xl border border-stone-200 bg-white object-contain"
+              style={{ width: 140, height: 140 }}
+            />
+          ) : (
+            <StrokeOrderImage char={char} visibleCount={visibleCount} />
+          )}
+          {!useWiki && (
+            <button
+              onClick={playAnimation}
+              disabled={playing}
+              type="button"
+              className="flex items-center gap-1 whitespace-nowrap rounded-full bg-amber-400 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-amber-500 disabled:opacity-50"
+            >
+              <Play size={11} />
+              {playing ? "Memutar..." : "Putar Ulang"}
+            </button>
+          )}
         </div>
         <ol className="max-h-52 flex-1 space-y-1.5 overflow-y-auto pr-1">
           {guide.steps.map((step, i) => (
@@ -843,7 +862,9 @@ function StrokeGuidePanel({ char }) {
         </ol>
       </div>
       <p className="mt-2 text-center text-[10px] text-amber-700">
-        Angka = urutan goresan (posisi perkiraan) — ikuti bentuk titik-titik samarnya.
+        {useWiki
+          ? "Animasi asli — Wikimedia Commons (domain publik)."
+          : "Angka = urutan goresan (posisi perkiraan) — ikuti bentuk titik-titik samarnya."}
       </p>
     </div>
   );
@@ -916,25 +937,33 @@ function DrawQuestion({ current, onAttempt }) {
     setChecking(true);
     setFeedback(null);
     const { iou, recall, precision } = await scoreDrawing(canvasRef.current, current.correct);
+    const isYoon = current.correct.length >= 2;
 
-    // Jumlah goresan (berapa kali pena diangkat) itu sinyal kuat: huruf yang jumlah/pola
-    // goresannya jauh berbeda dari seharusnya kemungkinan besar salah walau kebetulan
-    // menyentuh area yang mirip. Kalau jauh beda (selisih ≥ 2), naikkan standar kecocokan
-    // bentuknya jauh lebih ketat — kalau dekat/sama, pakai standar normal.
-    const guide = getStrokeGuide(current.correct);
-    const expected = guide ? guide.strokes : null;
-    const strokeFarOff = expected != null && Math.abs(strokeCountRef.current - expected) >= 2;
-    const iouMin = strokeFarOff ? 0.55 : 0.40;
-    const recallMin = strokeFarOff ? 0.85 : 0.70;
-    const precisionMin = strokeFarOff ? 0.55 : 0.40;
-
-    // Lolos kalau bentuknya benar-benar mirip secara keseluruhan (IoU tinggi — ini menghukum
-    // baik area yang terlewat MAUPUN coretan berlebih di luar target), ATAU kalau sudah
-    // menutupi hampir semua target TANPA banyak coretan di luar target (recall & precision
-    // dua-duanya cukup tinggi). Sengaja TIDAK meloloskan hanya berdasar satu metrik saja —
-    // itulah yang sebelumnya bikin coretan sembarang yang kebetulan menyentuh area huruf bisa
-    // lolos meski bentuknya jelas berbeda.
-    const isCorrect = iou >= iouMin || (recall >= recallMin && precision >= precisionMin);
+    let isCorrect;
+    if (isYoon) {
+      // Huruf yōon (kombinasi 2 karakter, mis. りゃ) jauh lebih sulit dicocokkan secara piksel
+      // dengan akurat — dua bentuk beda ukuran dalam satu kotak kecil. Supaya orang yang sudah
+      // menulis dengan benar tidak terus-menerus ditolak gara-gara ketatnya perbandingan
+      // piksel, longgarkan standarnya di sini dan JANGAN ikut standar ketat jumlah-goresan
+      // (perkiraan jumlah goresan untuk yōon kurang bisa diandalkan dibanding huruf tunggal).
+      isCorrect = iou >= 0.22 || recall >= 0.45;
+    } else {
+      // Jumlah goresan (berapa kali pena diangkat) itu sinyal kuat khusus huruf tunggal: huruf
+      // yang jumlah/pola goresannya jauh berbeda dari seharusnya kemungkinan besar salah
+      // walau kebetulan menyentuh area yang mirip. Kalau jauh beda (selisih ≥ 2), naikkan
+      // standar kecocokan bentuknya jauh lebih ketat — kalau dekat/sama, pakai standar normal.
+      const guide = getStrokeGuide(current.correct);
+      const expected = guide ? guide.strokes : null;
+      const strokeFarOff = expected != null && Math.abs(strokeCountRef.current - expected) >= 2;
+      const iouMin = strokeFarOff ? 0.55 : 0.40;
+      const recallMin = strokeFarOff ? 0.85 : 0.70;
+      const precisionMin = strokeFarOff ? 0.55 : 0.40;
+      // Lolos kalau bentuknya benar-benar mirip secara keseluruhan (IoU tinggi — ini menghukum
+      // baik area yang terlewat MAUPUN coretan berlebih di luar target), ATAU kalau sudah
+      // menutupi hampir semua target TANPA banyak coretan di luar target (recall & precision
+      // dua-duanya cukup tinggi).
+      isCorrect = iou >= iouMin || (recall >= recallMin && precision >= precisionMin);
+    }
     setChecking(false);
 
     if (isCorrect) {
