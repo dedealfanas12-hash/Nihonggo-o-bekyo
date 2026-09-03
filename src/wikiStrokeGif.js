@@ -1,7 +1,8 @@
 // Alamat GIF animasi urutan goresan ASLI dari Wikimedia Commons (domain publik / CC0,
-// pembuat: Sirgazil, commons.wikimedia.org). Cuma mencakup 46+46 karakter dasar — Wikipedia
-// tidak punya aset terpisah untuk dakuten/handakuten/yōon, jadi karakter turunan tetap pakai
-// sistem titik-titik buatan sendiri (lihat StrokeOrderImage di App.jsx).
+// pembuat: Sirgazil, commons.wikimedia.org). Mencakup 46+46 karakter dasar (paling pasti)
+// plus dakuten & handakuten (がぱ dst, 25+25 karakter — proyek sumbernya melacak ini tapi
+// beberapa mungkin belum benar-benar diselesaikan, jadi lebih sering jatuh ke fallback).
+// Yōon (きゃ dst, gabungan 2 karakter) TIDAK ada di Wikipedia — tetap pakai sistem sendiri.
 //
 // Alamatnya dihitung otomatis dari pola path Wikimedia (bukan ditebak) tapi belum bisa saya
 // verifikasi satu-satu langsung dari sandbox saya (domain Wikipedia diblokir di sisi alat
@@ -100,4 +101,54 @@ export const WIKI_STROKE_GIF = {
   "ワ": "https://upload.wikimedia.org/wikipedia/commons/c/c8/Katakana_ワ_stroke_order_animation.gif",
   "ヲ": "https://upload.wikimedia.org/wikipedia/commons/3/35/Katakana_ヲ_stroke_order_animation.gif",
   "ン": "https://upload.wikimedia.org/wikipedia/commons/9/9f/Katakana_ン_stroke_order_animation.gif",
+  "が": "https://upload.wikimedia.org/wikipedia/commons/1/1e/Hiragana_が_stroke_order_animation.gif",
+  "ぎ": "https://upload.wikimedia.org/wikipedia/commons/2/23/Hiragana_ぎ_stroke_order_animation.gif",
+  "ぐ": "https://upload.wikimedia.org/wikipedia/commons/6/6b/Hiragana_ぐ_stroke_order_animation.gif",
+  "げ": "https://upload.wikimedia.org/wikipedia/commons/4/44/Hiragana_げ_stroke_order_animation.gif",
+  "ご": "https://upload.wikimedia.org/wikipedia/commons/8/84/Hiragana_ご_stroke_order_animation.gif",
+  "ざ": "https://upload.wikimedia.org/wikipedia/commons/3/37/Hiragana_ざ_stroke_order_animation.gif",
+  "じ": "https://upload.wikimedia.org/wikipedia/commons/6/65/Hiragana_じ_stroke_order_animation.gif",
+  "ず": "https://upload.wikimedia.org/wikipedia/commons/d/da/Hiragana_ず_stroke_order_animation.gif",
+  "ぜ": "https://upload.wikimedia.org/wikipedia/commons/e/e1/Hiragana_ぜ_stroke_order_animation.gif",
+  "ぞ": "https://upload.wikimedia.org/wikipedia/commons/6/62/Hiragana_ぞ_stroke_order_animation.gif",
+  "だ": "https://upload.wikimedia.org/wikipedia/commons/4/42/Hiragana_だ_stroke_order_animation.gif",
+  "ぢ": "https://upload.wikimedia.org/wikipedia/commons/1/1b/Hiragana_ぢ_stroke_order_animation.gif",
+  "づ": "https://upload.wikimedia.org/wikipedia/commons/6/65/Hiragana_づ_stroke_order_animation.gif",
+  "で": "https://upload.wikimedia.org/wikipedia/commons/0/08/Hiragana_で_stroke_order_animation.gif",
+  "ど": "https://upload.wikimedia.org/wikipedia/commons/f/f3/Hiragana_ど_stroke_order_animation.gif",
+  "ば": "https://upload.wikimedia.org/wikipedia/commons/5/53/Hiragana_ば_stroke_order_animation.gif",
+  "び": "https://upload.wikimedia.org/wikipedia/commons/e/e5/Hiragana_び_stroke_order_animation.gif",
+  "ぶ": "https://upload.wikimedia.org/wikipedia/commons/2/2b/Hiragana_ぶ_stroke_order_animation.gif",
+  "べ": "https://upload.wikimedia.org/wikipedia/commons/c/c0/Hiragana_べ_stroke_order_animation.gif",
+  "ぼ": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Hiragana_ぼ_stroke_order_animation.gif",
+  "ぱ": "https://upload.wikimedia.org/wikipedia/commons/4/45/Hiragana_ぱ_stroke_order_animation.gif",
+  "ぴ": "https://upload.wikimedia.org/wikipedia/commons/7/7a/Hiragana_ぴ_stroke_order_animation.gif",
+  "ぷ": "https://upload.wikimedia.org/wikipedia/commons/0/09/Hiragana_ぷ_stroke_order_animation.gif",
+  "ぺ": "https://upload.wikimedia.org/wikipedia/commons/f/fa/Hiragana_ぺ_stroke_order_animation.gif",
+  "ぽ": "https://upload.wikimedia.org/wikipedia/commons/a/a5/Hiragana_ぽ_stroke_order_animation.gif",
+  "ガ": "https://upload.wikimedia.org/wikipedia/commons/3/39/Katakana_ガ_stroke_order_animation.gif",
+  "ギ": "https://upload.wikimedia.org/wikipedia/commons/3/39/Katakana_ギ_stroke_order_animation.gif",
+  "グ": "https://upload.wikimedia.org/wikipedia/commons/f/f1/Katakana_グ_stroke_order_animation.gif",
+  "ゲ": "https://upload.wikimedia.org/wikipedia/commons/4/4f/Katakana_ゲ_stroke_order_animation.gif",
+  "ゴ": "https://upload.wikimedia.org/wikipedia/commons/9/9b/Katakana_ゴ_stroke_order_animation.gif",
+  "ザ": "https://upload.wikimedia.org/wikipedia/commons/e/ed/Katakana_ザ_stroke_order_animation.gif",
+  "ジ": "https://upload.wikimedia.org/wikipedia/commons/d/db/Katakana_ジ_stroke_order_animation.gif",
+  "ズ": "https://upload.wikimedia.org/wikipedia/commons/2/2d/Katakana_ズ_stroke_order_animation.gif",
+  "ゼ": "https://upload.wikimedia.org/wikipedia/commons/4/4d/Katakana_ゼ_stroke_order_animation.gif",
+  "ゾ": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Katakana_ゾ_stroke_order_animation.gif",
+  "ダ": "https://upload.wikimedia.org/wikipedia/commons/d/d2/Katakana_ダ_stroke_order_animation.gif",
+  "ヂ": "https://upload.wikimedia.org/wikipedia/commons/1/1f/Katakana_ヂ_stroke_order_animation.gif",
+  "ヅ": "https://upload.wikimedia.org/wikipedia/commons/4/41/Katakana_ヅ_stroke_order_animation.gif",
+  "デ": "https://upload.wikimedia.org/wikipedia/commons/9/9d/Katakana_デ_stroke_order_animation.gif",
+  "ド": "https://upload.wikimedia.org/wikipedia/commons/c/c8/Katakana_ド_stroke_order_animation.gif",
+  "バ": "https://upload.wikimedia.org/wikipedia/commons/1/14/Katakana_バ_stroke_order_animation.gif",
+  "ビ": "https://upload.wikimedia.org/wikipedia/commons/c/cf/Katakana_ビ_stroke_order_animation.gif",
+  "ブ": "https://upload.wikimedia.org/wikipedia/commons/9/96/Katakana_ブ_stroke_order_animation.gif",
+  "ベ": "https://upload.wikimedia.org/wikipedia/commons/f/fc/Katakana_ベ_stroke_order_animation.gif",
+  "ボ": "https://upload.wikimedia.org/wikipedia/commons/6/6d/Katakana_ボ_stroke_order_animation.gif",
+  "パ": "https://upload.wikimedia.org/wikipedia/commons/b/bb/Katakana_パ_stroke_order_animation.gif",
+  "ピ": "https://upload.wikimedia.org/wikipedia/commons/2/2a/Katakana_ピ_stroke_order_animation.gif",
+  "プ": "https://upload.wikimedia.org/wikipedia/commons/6/61/Katakana_プ_stroke_order_animation.gif",
+  "ペ": "https://upload.wikimedia.org/wikipedia/commons/9/95/Katakana_ペ_stroke_order_animation.gif",
+  "ポ": "https://upload.wikimedia.org/wikipedia/commons/3/30/Katakana_ポ_stroke_order_animation.gif",
 };
