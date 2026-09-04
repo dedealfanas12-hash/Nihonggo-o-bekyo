@@ -433,7 +433,7 @@ export const STROKE_GUIDES = {
 };
 /* ---------- Peta turunan: dakuten (゛) / handakuten (゜) / yōon kecil ---------- */
 
-const DAKUTEN_BASE = {
+export const DAKUTEN_BASE = {
   "が": "か", "ぎ": "き", "ぐ": "く", "げ": "け", "ご": "こ",
   "ざ": "さ", "じ": "し", "ず": "す", "ぜ": "せ", "ぞ": "そ",
   "だ": "た", "ぢ": "ち", "づ": "つ", "で": "て", "ど": "と",
@@ -444,12 +444,12 @@ const DAKUTEN_BASE = {
   "バ": "ハ", "ビ": "ヒ", "ブ": "フ", "ベ": "ヘ", "ボ": "ホ",
 };
 
-const HANDAKUTEN_BASE = {
+export const HANDAKUTEN_BASE = {
   "ぱ": "は", "ぴ": "ひ", "ぷ": "ふ", "ぺ": "へ", "ぽ": "ほ",
   "パ": "ハ", "ピ": "ヒ", "プ": "フ", "ペ": "ヘ", "ポ": "ホ",
 };
 
-const SMALL_TO_BIG = {
+export const SMALL_TO_BIG = {
   "ゃ": "や", "ゅ": "ゆ", "ょ": "よ",
   "ャ": "ヤ", "ュ": "ユ", "ョ": "ヨ",
 };

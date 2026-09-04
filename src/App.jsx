@@ -3,8 +3,34 @@ import {
   Home, BookOpen, Pencil, Target, TrendingUp, Volume2, Lock, CheckCircle,
   Flame, ChevronRight, ChevronLeft, X, RotateCcw, Star, Sparkles, ArrowRight, Trophy, Eraser, Play,
 } from "lucide-react";
-import { getStrokeGuide } from "./strokeGuides.js";
+import { getStrokeGuide, DAKUTEN_BASE, HANDAKUTEN_BASE, SMALL_TO_BIG } from "./strokeGuides.js";
 import { WIKI_STROKE_GIF } from "./wikiStrokeGif.js";
+
+// Menerjemahkan karakter apa pun jadi animasi Wikipedia yang tersedia untuknya:
+//  - huruf dasar: satu animasi asli miliknya sendiri.
+//  - dakuten/handakuten (mis. が): Wikipedia tidak punya animasi KHUSUS untuk ini, tapi
+//    goresan badan hurufnya identik dengan huruf dasarnya (か) — jadi pakai animasi asli
+//    huruf dasarnya (tanda dakuten/handakuten-nya dijelaskan lewat teks langkah, bukan
+//    dianimasikan, supaya tidak perlu menebak jalur goresan tanda kecil itu).
+//  - yōon (mis. きゃ): gabungkan DUA animasi asli — huruf utama (き) & bentuk besar huruf
+//    kecilnya (や) — ditampilkan berdampingan, meniru proporsi huruf kecil yang sungguhan.
+// Mengembalikan null kalau tidak ada animasi asli sama sekali untuk komponennya (StrokeGuidePanel
+// akan otomatis jatuh ke sistem titik-titik sendiri).
+function resolveWikiAnimation(char) {
+  if (WIKI_STROKE_GIF[char]) return { kind: "single", url: WIKI_STROKE_GIF[char] };
+  if (char.length === 2) {
+    const mainUrl = resolveWikiAnimation(char[0]);
+    const smallBig = SMALL_TO_BIG[char[1]];
+    const smallUrl = smallBig ? WIKI_STROKE_GIF[smallBig] : null;
+    if (mainUrl && mainUrl.kind === "single" && smallUrl) {
+      return { kind: "compound", mainUrl: mainUrl.url, smallUrl };
+    }
+    return null;
+  }
+  const base = DAKUTEN_BASE[char] || HANDAKUTEN_BASE[char];
+  if (base && WIKI_STROKE_GIF[base]) return { kind: "single", url: WIKI_STROKE_GIF[base] };
+  return null;
+}
 import {
   isFirebaseEnabled,
   slugifyAccountName,
@@ -779,9 +805,10 @@ function StrokeGuidePanel({ char }) {
   const [visibleCount, setVisibleCount] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [wikiFailed, setWikiFailed] = useState(false);
+  const [smallWikiFailed, setSmallWikiFailed] = useState(false);
   const timerRef = useRef(null);
-  const wikiUrl = WIKI_STROKE_GIF[char];
-  const useWiki = !!wikiUrl && !wikiFailed;
+  const wiki = resolveWikiAnimation(char);
+  const useWiki = !!wiki && !wikiFailed && !(wiki.kind === "compound" && smallWikiFailed);
 
   function playAnimation() {
     if (!guide) return;
@@ -802,6 +829,7 @@ function StrokeGuidePanel({ char }) {
 
   useEffect(() => {
     setWikiFailed(false);
+    setSmallWikiFailed(false);
     if (!useWiki) playAnimation();
     return () => clearInterval(timerRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -820,9 +848,9 @@ function StrokeGuidePanel({ char }) {
           tanpa perlu gulir jauh — daftar langkahnya sendiri yang scroll kalau kepanjangan. */}
       <div className="mt-3 flex gap-3">
         <div className="flex shrink-0 flex-col items-center gap-2">
-          {useWiki ? (
+          {useWiki && wiki.kind === "single" && (
             <img
-              src={wikiUrl}
+              src={wiki.url}
               alt={`Animasi urutan goresan menulis ${char}`}
               width={140}
               height={140}
@@ -830,9 +858,26 @@ function StrokeGuidePanel({ char }) {
               className="rounded-xl border border-stone-200 bg-white object-contain"
               style={{ width: 140, height: 140 }}
             />
-          ) : (
-            <StrokeOrderImage char={char} visibleCount={visibleCount} />
           )}
+          {useWiki && wiki.kind === "compound" && (
+            <div className="relative" style={{ width: 140, height: 140 }}>
+              <img
+                src={wiki.mainUrl}
+                alt={`Animasi urutan goresan huruf utama ${char[0]}`}
+                onError={() => setWikiFailed(true)}
+                className="absolute left-0 top-0 rounded-xl border border-stone-200 bg-white object-contain"
+                style={{ width: 96, height: 96 }}
+              />
+              <img
+                src={wiki.smallUrl}
+                alt={`Animasi urutan goresan huruf kecil ${char[1]}`}
+                onError={() => setSmallWikiFailed(true)}
+                className="absolute bottom-0 right-0 rounded-lg border border-stone-200 bg-white object-contain"
+                style={{ width: 56, height: 56 }}
+              />
+            </div>
+          )}
+          {!useWiki && <StrokeOrderImage char={char} visibleCount={visibleCount} />}
           {!useWiki && (
             <button
               onClick={playAnimation}
@@ -1483,7 +1528,7 @@ function MateriView({ category, levelId, onBack, onStartPractice, onStartWrite, 
           <div key={w.kanji || w.reading} className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
             <div className="flex items-start justify-between gap-2">
               <p className="font-display text-xl font-bold text-stone-900">{w.kanji || w.reading}</p>
-              <SpeakerButton text={w.kanji || w.reading} />
+              <SpeakerButton text={w.reading || w.kanji} />
             </div>
             {w.kanji && <p className="text-sm text-stone-500">{w.reading}</p>}
             <p className="mt-1 text-xs font-semibold text-red-700">{w.romaji} · {w.meaning}</p>
