@@ -10,7 +10,7 @@ Dibangun dengan React + Vite + Tailwind CSS.
 - Kosakata dengan kanji, cara baca, romaji, arti, dan contoh kalimat
 - Mode Latihan (pilihan ganda / menulis) dan Tes per level
 - **Latihan menulis tangan** untuk hiragana & katakana: gambar huruf di kanvas (mouse/sentuh layar), diperiksa otomatis lewat perbandingan piksel dengan huruf asli — bukan cuma tebak-tebakan sendiri
-- Maksimal 3x percobaan per huruf; setelah itu **panduan langkah menulis** muncul otomatis — kotak gambar huruf dengan jejak titik-titik samar (dibuat dari bentuk asli hurufnya, bukan gambar tangan) plus lingkaran bernomor di titik mulai tiap goresan, ditambah rincian teks per langkah. Panduan yang sama juga bisa dilihat lebih awal lewat tautan "Lihat cara menulis"
+- Maksimal 3x percobaan per huruf; setelah itu **panduan langkah menulis** muncul otomatis — animasi urutan goresan asli (proyek AnimCJK, lisensi LGPL v3) untuk hiragana, katakana, dakuten, handakuten, dan yōon (gabungan animasi huruf utama + huruf kecil), ditambah rincian teks per langkah. Panduan yang sama juga bisa dilihat lebih awal lewat tautan "Lihat cara menulis"
 - Progres, XP, dan streak tersimpan otomatis (lihat "Progres bersama" di bawah)
 - Pengucapan kata dalam bahasa Jepang lewat Web Speech API
 - Animasi confetti otomatis saat lulus tes (skor ≥ 80%)
@@ -121,9 +121,13 @@ Tidak perlu mengubah `vite.config.js` — proyek ini sudah pakai base path relat
 ```
 nihongo-step/
 ├── .github/workflows/deploy.yml   # Auto-deploy ke GitHub Pages
+├── public/
+│   └── kana-svg/                  # 147 file animasi urutan goresan asli (proyek AnimCJK, LGPL v3 —
+│                                   #   lihat LGPL.txt di folder ini). Dasar + dakuten + handakuten,
+│                                   #   masing-masing sudah lengkap dengan tanda dakuten/handakuten-nya
 ├── src/
 │   ├── App.jsx                    # Komponen utama aplikasi
-│   ├── strokeGuides.js            # Data panduan urutan goresan (46 hiragana + 46 katakana dasar,
+│   ├── strokeGuides.js            # Rincian teks per langkah (46 hiragana + 46 katakana dasar,
 │   │                               #   dakuten/handakuten/yōon diturunkan otomatis dari data dasar)
 │   ├── firebaseConfig.js          # Konfigurasi Firebase untuk progres bersama (null = nonaktif)
 │   ├── firebaseSync.js            # Logika sinkronisasi real-time (no-op kalau config kosong)
@@ -135,6 +139,10 @@ nihongo-step/
 ├── tailwind.config.js
 └── postcss.config.js
 ```
+
+## Atribusi
+
+Animasi urutan goresan (`public/kana-svg/`) berasal dari proyek [AnimCJK](https://github.com/parsimonhi/animCJK) oleh FM-SH, dipakai apa adanya (tidak dimodifikasi) di bawah lisensi **GNU LGPL v3** — teks lengkap lisensinya ada di `public/kana-svg/LGPL.txt`.
 
 ## Catatan penyimpanan progres
 

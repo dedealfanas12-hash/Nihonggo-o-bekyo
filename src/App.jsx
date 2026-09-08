@@ -3,33 +3,27 @@ import {
   Home, BookOpen, Pencil, Target, TrendingUp, Volume2, Lock, CheckCircle,
   Flame, ChevronRight, ChevronLeft, X, RotateCcw, Star, Sparkles, ArrowRight, Trophy, Eraser, Play,
 } from "lucide-react";
-import { getStrokeGuide, DAKUTEN_BASE, HANDAKUTEN_BASE, SMALL_TO_BIG } from "./strokeGuides.js";
-import { WIKI_STROKE_GIF } from "./wikiStrokeGif.js";
+import { getStrokeGuide } from "./strokeGuides.js";
 
-// Menerjemahkan karakter apa pun jadi animasi Wikipedia yang tersedia untuknya:
-//  - huruf dasar: satu animasi asli miliknya sendiri.
-//  - dakuten/handakuten (mis. が): Wikipedia tidak punya animasi KHUSUS untuk ini, tapi
-//    goresan badan hurufnya identik dengan huruf dasarnya (か) — jadi pakai animasi asli
-//    huruf dasarnya (tanda dakuten/handakuten-nya dijelaskan lewat teks langkah, bukan
-//    dianimasikan, supaya tidak perlu menebak jalur goresan tanda kecil itu).
-//  - yōon (mis. きゃ): gabungkan DUA animasi asli — huruf utama (き) & bentuk besar huruf
-//    kecilnya (や) — ditampilkan berdampingan, meniru proporsi huruf kecil yang sungguhan.
-// Mengembalikan null kalau tidak ada animasi asli sama sekali untuk komponennya (StrokeGuidePanel
-// akan otomatis jatuh ke sistem titik-titik sendiri).
-function resolveWikiAnimation(char) {
-  if (WIKI_STROKE_GIF[char]) return { kind: "single", url: WIKI_STROKE_GIF[char] };
+// Jalur file animasi lokal (AnimCJK, lisensi LGPL v3 — lihat public/kana-svg/LGPL.txt),
+// self-hosted di public/kana-svg/, tidak bergantung server luar. Nama filenya = kode unicode
+// desimal karakternya (baku dari proyek aslinya), jadi bisa dihitung langsung tanpa tabel.
+function kanaSvgPath(char) {
+  return `/kana-svg/${char.codePointAt(0)}.svg`;
+}
+
+// Menerjemahkan karakter apa pun jadi animasi yang sesuai:
+//  - huruf dasar, dakuten, MAUPUN handakuten: masing-masing sudah punya animasi utuhnya
+//    sendiri di AnimCJK — goresan tanda dakuten/handakuten-nya ikut teranimasikan langsung,
+//    bukan cuma badan hurufnya (beda dari pendekatan Wikipedia sebelumnya).
+//  - yōon (kombinasi 2 karakter, mis. きゃ): gabungkan animasi huruf utama + animasi huruf
+//    KECIL aslinya (AnimCJK punya bentuk kecil ゃゅょ/ャュョ tersendiri, bukan bentuk besar
+//    yang diperkecil paksa), ditampilkan berdampingan.
+function resolveStrokeAnimation(char) {
   if (char.length === 2) {
-    const mainUrl = resolveWikiAnimation(char[0]);
-    const smallBig = SMALL_TO_BIG[char[1]];
-    const smallUrl = smallBig ? WIKI_STROKE_GIF[smallBig] : null;
-    if (mainUrl && mainUrl.kind === "single" && smallUrl) {
-      return { kind: "compound", mainUrl: mainUrl.url, smallUrl };
-    }
-    return null;
+    return { kind: "compound", mainPath: kanaSvgPath(char[0]), smallPath: kanaSvgPath(char[1]) };
   }
-  const base = DAKUTEN_BASE[char] || HANDAKUTEN_BASE[char];
-  if (base && WIKI_STROKE_GIF[base]) return { kind: "single", url: WIKI_STROKE_GIF[base] };
-  return null;
+  return { kind: "single", path: kanaSvgPath(char) };
 }
 import {
   isFirebaseEnabled,
@@ -793,50 +787,30 @@ function StrokeOrderImage({ char, size = 140, visibleCount }) {
   );
 }
 
-const STROKE_ANIM_STEP_MS = 900;
-
-// Full "how to write this" panel: dotted image + numbered steps — shown automatically once
+// Full "how to write this" panel: real stroke-order animation (AnimCJK) when available, with a
+// dotted-trace fallback for the rare case an SVG fails to load. Shown automatically once
 // MAX_DRAW_ATTEMPTS is reached, or any time earlier via the optional "Lihat cara menulis" link.
-// Auto-plays a step-by-step animation once when first shown (numbers appear one at a time,
-// synced with the matching text step highlighting) — a stand-in for a real video, built from
-// the same verified stroke data. "Putar Ulang" replays it any time.
 function StrokeGuidePanel({ char }) {
   const guide = getStrokeGuide(char);
-  const [visibleCount, setVisibleCount] = useState(0);
-  const [playing, setPlaying] = useState(false);
-  const [wikiFailed, setWikiFailed] = useState(false);
-  const [smallWikiFailed, setSmallWikiFailed] = useState(false);
-  const timerRef = useRef(null);
-  const wiki = resolveWikiAnimation(char);
-  const useWiki = !!wiki && !wikiFailed && !(wiki.kind === "compound" && smallWikiFailed);
+  const [svgFailed, setSvgFailed] = useState(false);
+  const [smallSvgFailed, setSmallSvgFailed] = useState(false);
+  const [replayNonce, setReplayNonce] = useState(0);
+  const anim = resolveStrokeAnimation(char);
+  const useAnim = !(anim.kind === "compound" && (svgFailed || smallSvgFailed)) && !(anim.kind === "single" && svgFailed);
 
-  function playAnimation() {
-    if (!guide) return;
-    clearInterval(timerRef.current);
-    setPlaying(true);
-    setVisibleCount(1);
-    let count = 1;
-    timerRef.current = setInterval(() => {
-      count += 1;
-      if (count > guide.steps.length) {
-        clearInterval(timerRef.current);
-        setPlaying(false);
-        return;
-      }
-      setVisibleCount(count);
-    }, STROKE_ANIM_STEP_MS);
+  function replay() {
+    setSvgFailed(false);
+    setSmallSvgFailed(false);
+    setReplayNonce((n) => n + 1);
   }
 
   useEffect(() => {
-    setWikiFailed(false);
-    setSmallWikiFailed(false);
-    if (!useWiki) playAnimation();
-    return () => clearInterval(timerRef.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setSvgFailed(false);
+    setSmallSvgFailed(false);
+    setReplayNonce(0);
   }, [char]);
 
   if (!guide) return null;
-  const activeIdx = playing ? visibleCount - 1 : -1;
 
   return (
     <div className="mt-4 w-full max-w-md rounded-2xl border-2 border-amber-200 bg-amber-50 p-4 text-left">
@@ -848,55 +822,52 @@ function StrokeGuidePanel({ char }) {
           tanpa perlu gulir jauh — daftar langkahnya sendiri yang scroll kalau kepanjangan. */}
       <div className="mt-3 flex gap-3">
         <div className="flex shrink-0 flex-col items-center gap-2">
-          {useWiki && wiki.kind === "single" && (
+          {useAnim && anim.kind === "single" && (
             <img
-              src={wiki.url}
+              key={`s-${replayNonce}`}
+              src={anim.path}
               alt={`Animasi urutan goresan menulis ${char}`}
-              width={140}
-              height={140}
-              onError={() => setWikiFailed(true)}
+              onError={() => setSvgFailed(true)}
               className="rounded-xl border border-stone-200 bg-white object-contain"
               style={{ width: 140, height: 140 }}
             />
           )}
-          {useWiki && wiki.kind === "compound" && (
+          {useAnim && anim.kind === "compound" && (
             <div className="relative" style={{ width: 140, height: 140 }}>
               <img
-                src={wiki.mainUrl}
+                key={`m-${replayNonce}`}
+                src={anim.mainPath}
                 alt={`Animasi urutan goresan huruf utama ${char[0]}`}
-                onError={() => setWikiFailed(true)}
+                onError={() => setSvgFailed(true)}
                 className="absolute left-0 top-0 rounded-xl border border-stone-200 bg-white object-contain"
                 style={{ width: 96, height: 96 }}
               />
               <img
-                src={wiki.smallUrl}
+                key={`sm-${replayNonce}`}
+                src={anim.smallPath}
                 alt={`Animasi urutan goresan huruf kecil ${char[1]}`}
-                onError={() => setSmallWikiFailed(true)}
+                onError={() => setSmallSvgFailed(true)}
                 className="absolute bottom-0 right-0 rounded-lg border border-stone-200 bg-white object-contain"
                 style={{ width: 56, height: 56 }}
               />
             </div>
           )}
-          {!useWiki && <StrokeOrderImage char={char} visibleCount={visibleCount} />}
-          {!useWiki && (
-            <button
-              onClick={playAnimation}
-              disabled={playing}
-              type="button"
-              className="flex items-center gap-1 whitespace-nowrap rounded-full bg-amber-400 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-amber-500 disabled:opacity-50"
-            >
-              <Play size={11} />
-              {playing ? "Memutar..." : "Putar Ulang"}
-            </button>
-          )}
+          {!useAnim && <StrokeOrderImage char={char} visibleCount={guide.points.length} />}
+          <button
+            onClick={useAnim ? replay : undefined}
+            type="button"
+            className="flex items-center gap-1 whitespace-nowrap rounded-full bg-amber-400 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-amber-500 disabled:opacity-50"
+            disabled={!useAnim}
+          >
+            <Play size={11} />
+            Putar Ulang
+          </button>
         </div>
         <ol className="max-h-52 flex-1 space-y-1.5 overflow-y-auto pr-1">
           {guide.steps.map((step, i) => (
             <li
               key={i}
-              className={`flex items-start gap-1.5 rounded-lg p-1.5 text-xs text-stone-700 transition-colors duration-300 ${
-                i === activeIdx ? "bg-amber-200/70 font-semibold" : ""
-              }`}
+              className="flex items-start gap-1.5 rounded-lg p-1.5 text-xs text-stone-700"
             >
               <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-700 text-[10px] font-bold text-white">
                 {i + 1}
@@ -907,8 +878,8 @@ function StrokeGuidePanel({ char }) {
         </ol>
       </div>
       <p className="mt-2 text-center text-[10px] text-amber-700">
-        {useWiki
-          ? "Animasi asli — Wikimedia Commons (domain publik)."
+        {useAnim
+          ? "Animasi asli — proyek AnimCJK (LGPL v3)."
           : "Angka = urutan goresan (posisi perkiraan) — ikuti bentuk titik-titik samarnya."}
       </p>
     </div>
