@@ -9,7 +9,12 @@ import { getStrokeGuide } from "./strokeGuides.js";
 // self-hosted di public/kana-svg/, tidak bergantung server luar. Nama filenya = kode unicode
 // desimal karakternya (baku dari proyek aslinya), jadi bisa dihitung langsung tanpa tabel.
 function kanaSvgPath(char) {
-  return `/kana-svg/${char.codePointAt(0)}.svg`;
+  // Path RELATIF (bukan diawali "/") supaya otomatis ikut menyesuaikan lokasi deployment —
+  // baik di root domain (Vercel/Netlify) maupun di subfolder GitHub Pages (mis. /nama-repo/).
+  // Ini konsisten dengan `base: "./"` di vite.config.js untuk file JS/CSS bawaan Vite; bedanya,
+  // path ini dirakit manual saat runtime (nama file dihitung dari kode karakternya), jadi tidak
+  // otomatis ikut proses build Vite, dan perlu ditulis relatif secara eksplisit di sini.
+  return `./kana-svg/${char.codePointAt(0)}.svg`;
 }
 
 // Menerjemahkan karakter apa pun jadi animasi yang sesuai:
