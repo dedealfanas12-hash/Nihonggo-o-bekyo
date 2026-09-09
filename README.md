@@ -74,6 +74,7 @@ Prasyarat: Node.js 18 atau lebih baru.
 
 ```bash
 npm install
+unzip kana-svg.zip -d public/kana-svg   # sekali saja — GitHub Actions melakukan ini otomatis saat deploy
 npm run dev
 ```
 
@@ -122,9 +123,10 @@ Tidak perlu mengubah `vite.config.js` — proyek ini sudah pakai base path relat
 nihongo-step/
 ├── .github/workflows/deploy.yml   # Auto-deploy ke GitHub Pages
 ├── public/
-│   └── kana-svg/                  # 147 file animasi urutan goresan asli (proyek AnimCJK, LGPL v3 —
-│                                   #   lihat LGPL.txt di folder ini). Dasar + dakuten + handakuten,
-│                                   #   masing-masing sudah lengkap dengan tanda dakuten/handakuten-nya
+│   └── kana-svg/                  # DIHASILKAN OTOMATIS dari kana-svg.zip saat build (lihat
+│                                   #   .github/workflows/deploy.yml) — tidak disimpan langsung
+│                                   #   di git (147 file individual terlalu banyak untuk di-upload
+│                                   #   manual satu-satu), cukup 1 file kana-svg.zip di root proyek
 ├── src/
 │   ├── App.jsx                    # Komponen utama aplikasi
 │   ├── strokeGuides.js            # Rincian teks per langkah (46 hiragana + 46 katakana dasar,
@@ -142,7 +144,7 @@ nihongo-step/
 
 ## Atribusi
 
-Animasi urutan goresan (`public/kana-svg/`) berasal dari proyek [AnimCJK](https://github.com/parsimonhi/animCJK) oleh FM-SH, dipakai apa adanya (tidak dimodifikasi) di bawah lisensi **GNU LGPL v3** — teks lengkap lisensinya ada di `public/kana-svg/LGPL.txt`.
+Animasi urutan goresan (147 file, di-generate ke `public/kana-svg/` saat build dari `kana-svg.zip`) berasal dari proyek [AnimCJK](https://github.com/parsimonhi/animCJK) oleh FM-SH, dipakai apa adanya (tidak dimodifikasi) di bawah lisensi **GNU LGPL v3** — teks lengkap lisensinya ikut di dalam zip itu (`LGPL.txt`).
 
 ## Catatan penyimpanan progres
 
