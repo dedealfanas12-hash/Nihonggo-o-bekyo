@@ -128,16 +128,16 @@ const VOCAB_LEVELS = [
     { kanji: "車", reading: "くるま", romaji: "kuruma", meaning: "mobil", example: "車で行きます。(Pergi dengan mobil.)" },
   ]},
   { id: 2, title: "Aktivitas", words: [
-    { kanji: "食べる", reading: "たべる", romaji: "taberu", meaning: "makan", example: "ご飯を食べます。(Makan nasi.)" },
-    { kanji: "飲む", reading: "のむ", romaji: "nomu", meaning: "minum", example: "お茶を飲みます。(Minum teh.)" },
-    { kanji: "行く", reading: "いく", romaji: "iku", meaning: "pergi", example: "学校へ行きます。(Pergi ke sekolah.)" },
-    { kanji: "来る", reading: "くる", romaji: "kuru", meaning: "datang", example: "友達が来ます。(Teman datang.)" },
-    { kanji: "見る", reading: "みる", romaji: "miru", meaning: "melihat", example: "映画を見ます。(Menonton film.)" },
-    { kanji: "読む", reading: "よむ", romaji: "yomu", meaning: "membaca", example: "本を読みます。(Membaca buku.)" },
-    { kanji: "書く", reading: "かく", romaji: "kaku", meaning: "menulis", example: "手紙を書きます。(Menulis surat.)" },
-    { kanji: "話す", reading: "はなす", romaji: "hanasu", meaning: "berbicara", example: "日本語を話します。(Berbicara bahasa Jepang.)" },
-    { kanji: "買う", reading: "かう", romaji: "kau", meaning: "membeli", example: "パンを買います。(Membeli roti.)" },
-    { kanji: "寝る", reading: "ねる", romaji: "neru", meaning: "tidur", example: "早く寝ます。(Tidur lebih awal.)" },
+    { kanji: "食べる", reading: "たべる", romaji: "taberu", meaning: "makan", formal: { kanji: "食べます", reading: "たべます", romaji: "tabemasu" }, example: "ご飯を食べます。(Makan nasi.)" },
+    { kanji: "飲む", reading: "のむ", romaji: "nomu", meaning: "minum", formal: { kanji: "飲みます", reading: "のみます", romaji: "nomimasu" }, example: "お茶を飲みます。(Minum teh.)" },
+    { kanji: "行く", reading: "いく", romaji: "iku", meaning: "pergi", formal: { kanji: "行きます", reading: "いきます", romaji: "ikimasu" }, example: "学校へ行きます。(Pergi ke sekolah.)" },
+    { kanji: "来る", reading: "くる", romaji: "kuru", meaning: "datang", formal: { kanji: "来ます", reading: "きます", romaji: "kimasu" }, example: "友達が来ます。(Teman datang.)" },
+    { kanji: "見る", reading: "みる", romaji: "miru", meaning: "melihat", formal: { kanji: "見ます", reading: "みます", romaji: "mimasu" }, example: "映画を見ます。(Menonton film.)" },
+    { kanji: "読む", reading: "よむ", romaji: "yomu", meaning: "membaca", formal: { kanji: "読みます", reading: "よみます", romaji: "yomimasu" }, example: "本を読みます。(Membaca buku.)" },
+    { kanji: "書く", reading: "かく", romaji: "kaku", meaning: "menulis", formal: { kanji: "書きます", reading: "かきます", romaji: "kakimasu" }, example: "手紙を書きます。(Menulis surat.)" },
+    { kanji: "話す", reading: "はなす", romaji: "hanasu", meaning: "berbicara", formal: { kanji: "話します", reading: "はなします", romaji: "hanashimasu" }, example: "日本語を話します。(Berbicara bahasa Jepang.)" },
+    { kanji: "買う", reading: "かう", romaji: "kau", meaning: "membeli", formal: { kanji: "買います", reading: "かいます", romaji: "kaimasu" }, example: "パンを買います。(Membeli roti.)" },
+    { kanji: "寝る", reading: "ねる", romaji: "neru", meaning: "tidur", formal: { kanji: "寝ます", reading: "ねます", romaji: "nemasu" }, example: "早く寝ます。(Tidur lebih awal.)" },
   ]},
   { id: 3, title: "Waktu", words: [
     { kanji: "今日", reading: "きょう", romaji: "kyou", meaning: "hari ini", example: "今日は忙しいです。(Hari ini sibuk.)" },
@@ -198,6 +198,100 @@ const VOCAB_LEVELS = [
     { kanji: "勉強", reading: "べんきょう", romaji: "benkyou", meaning: "belajar", example: "日本語を勉強します。(Belajar bahasa Jepang.)" },
     { kanji: "旅行", reading: "りょこう", romaji: "ryokou", meaning: "perjalanan", example: "旅行が好きです。(Suka bepergian.)" },
     { kanji: "天気", reading: "てんき", romaji: "tenki", meaning: "cuaca", example: "今日の天気はいいです。(Cuaca hari ini bagus.)" },
+  ]},
+  { id: 9, title: "Kata Kerja Lanjutan 1", words: [
+    { kanji: "作る", reading: "つくる", romaji: "tsukuru", meaning: "membuat", formal: { kanji: "作ります", reading: "つくります", romaji: "tsukurimasu" }, example: "料理を作ります。(Membuat masakan.)" },
+    { kanji: "使う", reading: "つかう", romaji: "tsukau", meaning: "memakai", formal: { kanji: "使います", reading: "つかいます", romaji: "tsukaimasu" }, example: "パソコンを使います。(Memakai komputer.)" },
+    { kanji: "待つ", reading: "まつ", romaji: "matsu", meaning: "menunggu", formal: { kanji: "待ちます", reading: "まちます", romaji: "machimasu" }, example: "駅で待ちます。(Menunggu di stasiun.)" },
+    { kanji: "立つ", reading: "たつ", romaji: "tatsu", meaning: "berdiri", formal: { kanji: "立ちます", reading: "たちます", romaji: "tachimasu" }, example: "ここに立ちます。(Berdiri di sini.)" },
+    { kanji: "座る", reading: "すわる", romaji: "suwaru", meaning: "duduk", formal: { kanji: "座ります", reading: "すわります", romaji: "suwarimasu" }, example: "椅子に座ります。(Duduk di kursi.)" },
+    { kanji: "開ける", reading: "あける", romaji: "akeru", meaning: "membuka", formal: { kanji: "開けます", reading: "あけます", romaji: "akemasu" }, example: "窓を開けます。(Membuka jendela.)" },
+    { kanji: "閉める", reading: "しめる", romaji: "shimeru", meaning: "menutup", formal: { kanji: "閉めます", reading: "しめます", romaji: "shimemasu" }, example: "ドアを閉めます。(Menutup pintu.)" },
+    { kanji: "教える", reading: "おしえる", romaji: "oshieru", meaning: "mengajar", formal: { kanji: "教えます", reading: "おしえます", romaji: "oshiemasu" }, example: "英語を教えます。(Mengajar bahasa Inggris.)" },
+    { kanji: "手伝う", reading: "てつだう", romaji: "tetsudau", meaning: "membantu", formal: { kanji: "手伝います", reading: "てつだいます", romaji: "tetsudaimasu" }, example: "母を手伝います。(Membantu ibu.)" },
+    { kanji: "分かる", reading: "わかる", romaji: "wakaru", meaning: "mengerti", formal: { kanji: "分かります", reading: "わかります", romaji: "wakarimasu" }, example: "質問が分かります。(Mengerti pertanyaannya.)" },
+  ]},
+  { id: 10, title: "Kata Kerja Lanjutan 2", words: [
+    { kanji: "走る", reading: "はしる", romaji: "hashiru", meaning: "berlari", formal: { kanji: "走ります", reading: "はしります", romaji: "hashirimasu" }, example: "公園で走ります。(Berlari di taman.)" },
+    { kanji: "歩く", reading: "あるく", romaji: "aruku", meaning: "berjalan", formal: { kanji: "歩きます", reading: "あるきます", romaji: "arukimasu" }, example: "駅まで歩きます。(Berjalan sampai stasiun.)" },
+    { kanji: "泳ぐ", reading: "およぐ", romaji: "oyogu", meaning: "berenang", formal: { kanji: "泳ぎます", reading: "およぎます", romaji: "oyogimasu" }, example: "海で泳ぎます。(Berenang di laut.)" },
+    { kanji: "遊ぶ", reading: "あそぶ", romaji: "asobu", meaning: "bermain", formal: { kanji: "遊びます", reading: "あそびます", romaji: "asobimasu" }, example: "友達と遊びます。(Bermain dengan teman.)" },
+    { kanji: "働く", reading: "はたらく", romaji: "hataraku", meaning: "bekerja", formal: { kanji: "働きます", reading: "はたらきます", romaji: "hatarakimasu" }, example: "会社で働きます。(Bekerja di perusahaan.)" },
+    { kanji: "休む", reading: "やすむ", romaji: "yasumu", meaning: "istirahat", formal: { kanji: "休みます", reading: "やすみます", romaji: "yasumimasu" }, example: "今日は休みます。(Istirahat hari ini.)" },
+    { kanji: "洗う", reading: "あらう", romaji: "arau", meaning: "mencuci", formal: { kanji: "洗います", reading: "あらいます", romaji: "araimasu" }, example: "手を洗います。(Mencuci tangan.)" },
+    { kanji: "送る", reading: "おくる", romaji: "okuru", meaning: "mengirim", formal: { kanji: "送ります", reading: "おくります", romaji: "okurimasu" }, example: "メールを送ります。(Mengirim surel.)" },
+    { kanji: "忘れる", reading: "わすれる", romaji: "wasureru", meaning: "melupakan", formal: { kanji: "忘れます", reading: "わすれます", romaji: "wasuremasu" }, example: "名前を忘れます。(Melupakan nama.)" },
+    { kanji: "覚える", reading: "おぼえる", romaji: "oboeru", meaning: "mengingat", formal: { kanji: "覚えます", reading: "おぼえます", romaji: "oboemasu" }, example: "漢字を覚えます。(Menghafal kanji.)" },
+  ]},
+  { id: 11, title: "Kata Sifat Lanjutan", words: [
+    { kanji: "元気", reading: "げんき", romaji: "genki", meaning: "sehat/bersemangat", example: "元気ですか。(Apa kabar?)" },
+    { kanji: "好き", reading: "すき", romaji: "suki", meaning: "suka", example: "音楽が好きです。(Suka musik.)" },
+    { kanji: "嫌い", reading: "きらい", romaji: "kirai", meaning: "tidak suka", example: "野菜が嫌いです。(Tidak suka sayur.)" },
+    { kanji: "有名", reading: "ゆうめい", romaji: "yuumei", meaning: "terkenal", example: "有名な歌手です。(Penyanyi yang terkenal.)" },
+    { kanji: "大切", reading: "たいせつ", romaji: "taisetsu", meaning: "penting", example: "家族は大切です。(Keluarga itu penting.)" },
+    { kanji: "便利", reading: "べんり", romaji: "benri", meaning: "praktis", example: "この道具は便利です。(Alat ini praktis.)" },
+    { kanji: "静か", reading: "しずか", romaji: "shizuka", meaning: "sunyi/tenang", example: "夜は静かです。(Malam hari sunyi.)" },
+    { kanji: "暑い", reading: "あつい", romaji: "atsui", meaning: "panas", example: "今日は暑いです。(Hari ini panas.)" },
+    { kanji: "寒い", reading: "さむい", romaji: "samui", meaning: "dingin", example: "冬は寒いです。(Musim dingin itu dingin.)" },
+    { kanji: "高い", reading: "たかい", romaji: "takai", meaning: "tinggi/mahal", example: "この店は高いです。(Toko ini mahal.)" },
+  ]},
+  { id: 12, title: "Tubuh & Pakaian", words: [
+    { kanji: "頭", reading: "あたま", romaji: "atama", meaning: "kepala", example: "頭が痛いです。(Kepala sakit.)" },
+    { kanji: "手", reading: "て", romaji: "te", meaning: "tangan", example: "手を洗います。(Mencuci tangan.)" },
+    { kanji: "足", reading: "あし", romaji: "ashi", meaning: "kaki", example: "足が長いです。(Kakinya panjang.)" },
+    { kanji: "目", reading: "め", romaji: "me", meaning: "mata", example: "目が大きいです。(Matanya besar.)" },
+    { kanji: "口", reading: "くち", romaji: "kuchi", meaning: "mulut", example: "口を開けます。(Membuka mulut.)" },
+    { kanji: "服", reading: "ふく", romaji: "fuku", meaning: "baju", example: "新しい服を買います。(Membeli baju baru.)" },
+    { kanji: "靴", reading: "くつ", romaji: "kutsu", meaning: "sepatu", example: "靴を履きます。(Memakai sepatu.)" },
+    { kanji: "帽子", reading: "ぼうし", romaji: "boushi", meaning: "topi", example: "帽子をかぶります。(Memakai topi.)" },
+    { kanji: "眼鏡", reading: "めがね", romaji: "megane", meaning: "kacamata", example: "眼鏡をかけます。(Memakai kacamata.)" },
+    { kanji: null, reading: "かばん", romaji: "kaban", meaning: "tas", example: "かばんを持ちます。(Membawa tas.)" },
+  ]},
+  { id: 13, title: "Alam & Cuaca", words: [
+    { kanji: "空", reading: "そら", romaji: "sora", meaning: "langit", example: "空が青いです。(Langitnya biru.)" },
+    { kanji: "雨", reading: "あめ", romaji: "ame", meaning: "hujan", example: "雨が降ります。(Hujan turun.)" },
+    { kanji: "雪", reading: "ゆき", romaji: "yuki", meaning: "salju", example: "雪が降ります。(Salju turun.)" },
+    { kanji: "風", reading: "かぜ", romaji: "kaze", meaning: "angin", example: "風が強いです。(Anginnya kencang.)" },
+    { kanji: "山", reading: "やま", romaji: "yama", meaning: "gunung", example: "山に登ります。(Mendaki gunung.)" },
+    { kanji: "川", reading: "かわ", romaji: "kawa", meaning: "sungai", example: "川で遊びます。(Bermain di sungai.)" },
+    { kanji: "海", reading: "うみ", romaji: "umi", meaning: "laut", example: "海で泳ぎます。(Berenang di laut.)" },
+    { kanji: "花", reading: "はな", romaji: "hana", meaning: "bunga", example: "花が咲きます。(Bunga mekar.)" },
+    { kanji: "木", reading: "き", romaji: "ki", meaning: "pohon", example: "木の下で休みます。(Istirahat di bawah pohon.)" },
+    { kanji: "太陽", reading: "たいよう", romaji: "taiyou", meaning: "matahari", example: "太陽が出ます。(Matahari muncul.)" },
+  ]},
+  { id: 14, title: "Warna", words: [
+    { kanji: "赤い", reading: "あかい", romaji: "akai", meaning: "merah", example: "赤い花です。(Bunga merah.)" },
+    { kanji: "青い", reading: "あおい", romaji: "aoi", meaning: "biru", example: "青い空です。(Langit biru.)" },
+    { kanji: "黒い", reading: "くろい", romaji: "kuroi", meaning: "hitam", example: "黒い靴です。(Sepatu hitam.)" },
+    { kanji: "白い", reading: "しろい", romaji: "shiroi", meaning: "putih", example: "白い服です。(Baju putih.)" },
+    { kanji: "黄色い", reading: "きいろい", romaji: "kiiroi", meaning: "kuning", example: "黄色いバナナです。(Pisang kuning.)" },
+    { kanji: "緑", reading: "みどり", romaji: "midori", meaning: "hijau", example: "緑の葉です。(Daun hijau.)" },
+    { kanji: "茶色", reading: "ちゃいろ", romaji: "chairo", meaning: "coklat", example: "茶色のかばんです。(Tas coklat.)" },
+    { kanji: "紫", reading: "むらさき", romaji: "murasaki", meaning: "ungu", example: "紫の花です。(Bunga ungu.)" },
+  ]},
+  { id: 15, title: "Angka 1-10", words: [
+    { kanji: "一", reading: "いち", romaji: "ichi", meaning: "satu", example: "一時に来ます。(Datang jam satu.)" },
+    { kanji: "二", reading: "に", romaji: "ni", meaning: "dua", example: "二人で行きます。(Pergi berdua.)" },
+    { kanji: "三", reading: "さん", romaji: "san", meaning: "tiga", example: "三時に会います。(Bertemu jam tiga.)" },
+    { kanji: "四", reading: "よん", romaji: "yon", meaning: "empat", example: "四月に来ます。(Datang bulan April.)" },
+    { kanji: "五", reading: "ご", romaji: "go", meaning: "lima", example: "五分待ちます。(Menunggu lima menit.)" },
+    { kanji: "六", reading: "ろく", romaji: "roku", meaning: "enam", example: "六時に起きます。(Bangun jam enam.)" },
+    { kanji: "七", reading: "なな", romaji: "nana", meaning: "tujuh", example: "七日間、休みます。(Libur tujuh hari.)" },
+    { kanji: "八", reading: "はち", romaji: "hachi", meaning: "delapan", example: "八時に寝ます。(Tidur jam delapan.)" },
+    { kanji: "九", reading: "きゅう", romaji: "kyuu", meaning: "sembilan", example: "九月に旅行します。(Bepergian bulan September.)" },
+    { kanji: "十", reading: "じゅう", romaji: "juu", meaning: "sepuluh", example: "十分で着きます。(Tiba dalam sepuluh menit.)" },
+  ]},
+  { id: 16, title: "Pekerjaan & Profesi", words: [
+    { kanji: "医者", reading: "いしゃ", romaji: "isha", meaning: "dokter", example: "父は医者です。(Ayah adalah dokter.)" },
+    { kanji: "看護師", reading: "かんごし", romaji: "kangoshi", meaning: "perawat", example: "姉は看護師です。(Kakak perempuan adalah perawat.)" },
+    { kanji: "警察官", reading: "けいさつかん", romaji: "keisatsukan", meaning: "polisi", example: "兄は警察官です。(Kakak laki-laki adalah polisi.)" },
+    { kanji: "料理人", reading: "りょうりにん", romaji: "ryourinin", meaning: "koki", example: "彼は料理人です。(Dia adalah koki.)" },
+    { kanji: "運転手", reading: "うんてんしゅ", romaji: "untenshu", meaning: "sopir", example: "運転手は親切です。(Sopirnya ramah.)" },
+    { kanji: "店員", reading: "てんいん", romaji: "ten-in", meaning: "pegawai toko", example: "店員に聞きます。(Bertanya pada pegawai toko.)" },
+    { kanji: "会社員", reading: "かいしゃいん", romaji: "kaishain", meaning: "karyawan", example: "父は会社員です。(Ayah adalah karyawan.)" },
+    { kanji: "農家", reading: "のうか", romaji: "nouka", meaning: "petani", example: "祖父は農家です。(Kakek adalah petani.)" },
+    { kanji: null, reading: "エンジニア", romaji: "enjinia", meaning: "insinyur", example: "彼女はエンジニアです。(Dia [perempuan] adalah insinyur.)" },
+    { kanji: "主婦", reading: "しゅふ", romaji: "shufu", meaning: "ibu rumah tangga", example: "母は主婦です。(Ibu adalah ibu rumah tangga.)" },
   ]},
 ];
 
@@ -431,7 +525,7 @@ function mergeWithDefaults(parsed) {
   };
 }
 
-function categoryMaxLevel(cat) { return cat === "vocabulary" ? 8 : 7; }
+function categoryMaxLevel(cat) { return CATEGORY_META[cat].levels.length; }
 function addBadge(list, id) { return list.includes(id) ? list : [...list, id]; }
 function isCategoryFullyPassed(state, cat) {
   const max = categoryMaxLevel(cat);
@@ -1508,6 +1602,15 @@ function MateriView({ category, levelId, onBack, onStartPractice, onStartWrite, 
             </div>
             {w.kanji && <p className="text-sm text-stone-500">{w.reading}</p>}
             <p className="mt-1 text-xs font-semibold text-red-700">{w.romaji} · {w.meaning}</p>
+            {w.formal && (
+              <div className="mt-2 flex items-center justify-between gap-2 rounded-lg bg-amber-50 px-2 py-1.5">
+                <div>
+                  <p className="text-xs font-semibold text-amber-800">Formal: {w.formal.kanji}</p>
+                  <p className="text-[11px] text-amber-600">{w.formal.reading} · {w.formal.romaji}</p>
+                </div>
+                <SpeakerButton text={w.formal.reading} />
+              </div>
+            )}
             <p className="mt-2 text-xs leading-relaxed text-stone-400">{w.example}</p>
           </div>
         )) : level.chars.map((c) => (
