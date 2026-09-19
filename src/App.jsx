@@ -1577,7 +1577,7 @@ function HubView({ mode, category, data, onPickCategory, onBackToCategories, onS
   );
 }
 
-function MateriView({ category, levelId, onBack, onStartPractice, onStartWrite, onStartTest }) {
+function MateriView({ category, levelId, onBack, onStartPractice, onStartWrite, onStartTest, onPracticeChar }) {
   const level = getLevelSet(category, levelId);
   const isVocab = CATEGORY_META[category].isVocab;
   if (!level) return null;
@@ -1618,6 +1618,13 @@ function MateriView({ category, levelId, onBack, onStartPractice, onStartWrite, 
             <p className="font-display text-3xl font-bold text-stone-900">{c.char}</p>
             <p className="mt-1 text-sm font-semibold text-stone-500">{c.romaji}</p>
             <SpeakerButton text={c.char} className="mt-2" />
+            <button
+              onClick={() => onPracticeChar(c)}
+              type="button"
+              className="mt-2 rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-red-700 hover:bg-red-100"
+            >
+              Latihan Menulis
+            </button>
           </div>
         ))}
       </div>
@@ -2121,6 +2128,16 @@ function NihongoStepAppInner({ account, onSwitchAccount }) {
           onStartPractice={() => goToQuiz({ category: route.category, levelId: route.levelId, mode: "practice", questionType: "mc" })}
           onStartWrite={() => goToQuiz({ category: route.category, levelId: route.levelId, mode: "practice", questionType: "write" })}
           onStartTest={() => goToQuiz({ category: route.category, levelId: route.levelId, mode: "test", questionType: "mixed" })}
+          onPracticeChar={(char) => {
+            const prefix = route.category === "hiragana" ? "hira" : "kata";
+            goToQuiz({
+              category: route.category,
+              levelId: route.levelId,
+              mode: "practice",
+              questionType: "write",
+              customBank: buildKanaDrawBank(Array(5).fill(char), route.levelId, `${prefix}_single`),
+            });
+          }}
         />
       );
     }
